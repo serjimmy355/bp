@@ -85,22 +85,7 @@ form {
   font-size: 1.08rem;
   max-width: 400px;
 }
-.action-row button:last-child {
-  margin-left: 18px;
-  font-size: 1.08rem;
-  padding: 0.7em 1.2em;
-}
 
-@media (max-width: 600px) {
-  .action-row {
-    flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
-  }
-  .action-row button:last-child {
-    margin-left: 0;
-  }
-}
 .measurement-row {
   display: flex;
   gap: 18px;
@@ -182,11 +167,6 @@ button:hover { background: var(--accent-hover); }
 button:active { transform: translateY(1px); }
 button:disabled { opacity: .6; cursor: not-allowed; }
 
-/* Headings */
-h1, h2, h3 {
-  color: var(--text);
-  margin: 0 0 .6em;
-}
 
 /* Table */
 table {
@@ -284,11 +264,6 @@ tbody tr:hover { background: #18213a; }
 .card { padding: 2em; }
 .read-the-docs { color: var(--muted); }
 
-button[type="submit"] {
-  width: 70%;
-  align-self: center;      /* center this flex item in the form */
-  /* or use margins instead: margin: 8px auto 0; */
-}
 
 /* Table action buttons */
 table button {
@@ -315,10 +290,3 @@ table button:hover {
   justify-content: center;
 }
 
-.action-row button {
-  flex: 1;              /* both share space evenly */
-  min-width: 140px;     /* stop them shrinking too far */
-  max-width: 70%;       /* never wider than submit button above */
-  font-size: 1.08rem;
-  padding: 0.7em 1.2em;
-}
