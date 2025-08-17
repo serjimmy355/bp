@@ -12,10 +12,8 @@
   --muted: #7d88a1;
 }/* Clean, modern, error-free stylesheet for your app */
 
-/* ✅ universal box-sizing (fixes mobile overflow) */
+/* Universal box-sizing (prevents padding making things overflow) */
 *, *::before, *::after { box-sizing: border-box; }
-
-
 
 button {
   background: var(--accent);
@@ -28,7 +26,6 @@ button {
   transition: background .15s, transform .02s;
   margin-top: 8px;
 }
-
 button.delete { background: var(--danger); }
 button.delete:hover { background: #d32f2f; }
 button:hover { background: var(--accent-hover); }
@@ -55,17 +52,21 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative; /* anchor the absolute logout */
 }
 
-/* centred logo */
+/* Top bar */
+.topbar {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+}
 .app-logo {
   display: block;
   height: 64px;
   margin: 0 auto 18px;
 }
-
-/* small logout in the top-right; not affected by the global button width */
 .logout-btn {
   position: absolute;
   top: 12px;
@@ -92,14 +93,12 @@ form {
   justify-content: center;
   margin-bottom: 12px;
 }
-
 .input-group {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   min-width: 120px;
 }
-
 .input-group label {
   margin-bottom: 4px;
   font-size: 0.98rem;
@@ -126,11 +125,8 @@ input, select, textarea {
   margin-bottom: 12px;
   transition: border-color .15s, box-shadow .15s;
 }
-
 textarea { height: auto; padding: 12px; resize: vertical; min-height: 90px; }
-
 input::placeholder { color: #7d88a1; }
-
 input:focus,
 input:focus-visible,
 select:focus,
@@ -185,30 +181,26 @@ h1, h2, h3 {
   margin: 0 0 .6em;
 }
 
-/* Table */
+/* Table (base styles only; sizing controlled by wrapper) */
 table {
   width: 100%;
-  max-width: 700px;
   border-collapse: collapse;
-  margin: 1rem auto 0 auto;
+  margin-top: 1rem;             /* remove auto side margins */
   background: var(--panel);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   border-radius: 12px;
-  overflow: hidden; /* ensure rounded corners clip */
+  overflow: hidden;             /* clip rounded corners */
 }
-
 th, td {
   padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
   color: var(--text);
 }
-
 th {
   background: #19213a;
   font-weight: 600;
 }
-
 tbody tr { background: var(--panel); }
 tbody tr:hover { background: #18213a; }
 
@@ -249,12 +241,34 @@ tbody tr:hover { background: #18213a; }
   a:nth-of-type(2) .logo { animation: logo-spin infinite 20s linear; }
 }
 
-/* Responsive */
+/* ---------- Responsive fixes for mobile overflow ---------- */
+
+/* Let flex children shrink so they don't force the card wider */
+.container > * { min-width: 0; }
+
+/* The Measurements block should use full card width */
+.message-container { width: 100%; }
+
+/* Horizontal scroll lives in this wrapper only */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Table behaves inside its wrapper (no page overhang) */
+.table-wrap table {
+  width: 100%;
+  max-width: none;      /* don't cap inside wrapper */
+  min-width: 640px;     /* columns need some room; tweak as you like */
+  margin: 1rem 0 0;     /* no side auto margins */
+}
+
 @media (max-width: 600px) {
   .container {
-    max-width: 100vw;          /* ✅ never wider than the viewport */
-    padding: 18px 4vw 18px;    /* ✅ viewport-safe padding */
-    margin: 24px auto;         /* trim margins on tiny screens */
+    max-width: 100vw;          /* never wider than viewport */
+    padding: 18px 4vw 18px;    /* viewport-safe padding */
+    margin: 24px auto;
     border-radius: 12px;
   }
   form { gap: 10px; }
@@ -270,11 +284,14 @@ tbody tr:hover { background: #18213a; }
   }
   h1, h2, h3 { font-size: 1.2rem; }
 
-  /* keep the logout button inside on very small screens */
+  /* keep the logout button inside tiny screens */
   .logout-btn {
     right: clamp(8px, 3vw, 16px);
     top: clamp(8px, 3vw, 16px);
   }
+
+  /* slightly smaller table minimum on very small phones */
+  .table-wrap table { min-width: 560px; }
 }
 
 /* Misc */
@@ -284,32 +301,20 @@ tbody tr:hover { background: #18213a; }
 /* Center the submit in the form */
 button[type="submit"] {
   width: 70%;
-  align-self: center; /* center this flex item in the form */
+  align-self: center;
 }
 
 /* Table action buttons (compact & red) */
 table button {
-  width: auto;                 /* shrink to fit text */
-  padding: 0.4em 0.9em;        /* smaller padding */
-  font-size: 0.9rem;           /* a bit smaller text */
-  border-radius: 8px;          /* less chunky */
-  margin: 0;                   /* remove top margin */
+  width: auto;
+  padding: 0.4em 0.9em;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  margin: 0;
   display: inline-block;
   background: var(--danger);
 }
 table button:hover { background: #e05555; }
 
-/* ✅ belts & braces: media/content never overflow parent width */
-img, table { max-width: 100%; height: auto; }
-/* Stop any flex child from blowing the container wider */
-.container > * { min-width: 0; }
-
-/* Responsive table wrapper */
-.table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Let the table be wider than the viewport and scroll inside the wrapper */
-.table-wrap table { min-width: 600px; } /* tweak if you want */
+/* Media should never overflow parent width */
+img { max-width: 100%; height: auto; }
