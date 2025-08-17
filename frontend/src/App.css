@@ -25,8 +25,7 @@ body {
   min-height: 100vh;
 }
 
-
-
+/* Container */
 .container {
   background: linear-gradient(180deg, #161e2e 0%, var(--panel) 100%);
   border: 1px solid var(--border);
@@ -42,6 +41,7 @@ body {
   justify-content: center;
 }
 
+/* Forms */
 form {
   width: 100%;
   display: flex;
@@ -50,71 +50,7 @@ form {
   align-items: stretch;
 }
 
-button {
-  margin-top: 10px;
-  margin-bottom: 0;
-  width: 100%;
-  font-size: 1.08rem;
-}
-
-.button-row {
-  display: flex;
-  gap: 16px;
-  margin-top: 12px;
-  justify-content: center;
-}
-
-@media (max-width: 600px) {
-  .container {
-    max-width: 98vw;
-    padding: 18px 6vw 18px;
-    min-height: 380px;
-    border-radius: 12px;
-  }
-  form {
-    gap: 10px;
-  }
-  button {
-    font-size: 1rem;
-    height: 42px;
-    padding: 0 10px;
-  }
-  h1, h2, h3 {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .container {
-    max-width: 98vw;
-    padding: 18px 6vw 18px;
-    min-height: 320px;
-    border-radius: 12px;
-  }
-  input, button {
-    font-size: 1rem;
-    height: 42px;
-    padding: 0 10px;
-  }
-  h1, h2, h3 {
-    font-size: 1.2rem;
-  }
-}
-
-h1, h2, h3 {
-  color: var(--text);
-  margin: 0 0 .6em;
-}
-
-label {
-  color: #b8c2d8;
-  font-weight: 500;
-  margin: 10px 0 8px;
-  display: block;
-}
-
-input {
-  width: 100%;
+input, select, textarea {
   height: 46px;
   padding: 0 12px;
   border-radius: 12px;
@@ -126,15 +62,22 @@ input {
   transition: border-color .15s, box-shadow .15s;
 }
 
+textarea { height: auto; padding: 12px; resize: vertical; min-height: 90px; }
+
 input::placeholder { color: #7d88a1; }
 
 input:focus,
-input:focus-visible {
+input:focus-visible,
+select:focus,
+textarea:focus {
   border-color: var(--input-focus);
   box-shadow: 0 0 0 3px rgba(75,134,255,.25);
 }
 
+/* Buttons */
 button {
+  width: 100%;
+  font-size: 1.08rem;
   background: var(--accent);
   color: #fff;
   border: none;
@@ -146,14 +89,29 @@ button {
   margin-top: 8px;
 }
 
+.button-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
 button:hover { background: var(--accent-hover); }
 button:active { transform: translateY(1px); }
 button:disabled { opacity: .6; cursor: not-allowed; }
 
+/* Headings */
+h1, h2, h3 {
+  color: var(--text);
+  margin: 0 0 .6em;
+}
+
+/* Table */
 table {
   width: 100%;
+  max-width: 700px;
   border-collapse: collapse;
-  margin-top: 1rem;
+  margin: 1rem auto 0 auto;
   background: var(--panel);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   border-radius: 12px;
@@ -175,23 +133,28 @@ th {
 tbody tr { background: var(--panel); }
 tbody tr:hover { background: #18213a; }
 
-
+/* Messages */
 .err {
   min-height: 1.1rem;
-  color: var(--danger);
   margin-top: 18px;
   font-size: 1rem;
   background: var(--panel);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0,0,0,.25);
   padding: 18px 32px;
-  max-width: 900px;
+  max-width: 720px;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
+  color: var(--danger);
 }
 
-/* (Optional) Vite/React boilerplate bits kept intact but made to fit theme */
+.err.success {
+  color: #2ecc40;
+  background: var(--panel);
+}
+
+/* Vite/React boilerplate theming */
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -215,10 +178,26 @@ tbody tr:hover { background: #18213a; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+  a:nth-of-type(2) .logo { animation: logo-spin infinite 20s linear; }
 }
 
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    max-width: 98vw;
+    padding: 18px 6vw 18px;
+    min-height: 320px;
+    border-radius: 12px;
+  }
+  form { gap: 10px; }
+  input, select, textarea, button {
+    font-size: 1rem;
+    height: 42px;
+    padding: 0 10px;
+  }
+  h1, h2, h3 { font-size: 1.2rem; }
+}
+
+/* Misc */
 .card { padding: 2em; }
 .read-the-docs { color: var(--muted); }

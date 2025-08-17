@@ -298,7 +298,7 @@ function App() {
           </table>
         </>
       )}
-  {message && <div className="err">{message}</div>}
+  {message && <div className={`err${message.toLowerCase().includes('success') ? ' success' : ''}`}>{message}</div>}
     </div>
   );
 }
