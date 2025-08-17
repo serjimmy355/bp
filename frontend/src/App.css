@@ -76,14 +76,14 @@ form {
   gap: 18px;
   align-items: center;
   margin-bottom: 18px;
-  justify-content: space-between;
+  justify-content: center;
 }
 .action-row button {
-  flex: 1 1 0;
+  width: 35%;
   min-width: 120px;
   padding: 0.7em 1.2em;
   font-size: 1.08rem;
-  max-width: 220px;
+  max-width: 400px;
 }
 .action-row button:last-child {
   margin-left: 18px;
