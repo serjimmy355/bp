@@ -10,70 +10,104 @@
 
 export default {
   async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    const { DB } = env;
-    if (request.method === 'POST' && url.pathname === '/register') {
-      const { username, password } = await request.json();
-      if (!username || !password) {
-        return new Response('Missing username or password', { status: 400 });
-      }
-      // Hash password
-      const bcrypt = await import('bcryptjs');
-      const salt = bcrypt.genSaltSync(10);
-      const hash = bcrypt.hashSync(password, salt);
-      try {
-        await DB.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)').bind(username, hash).run();
-        return new Response('User registered', { status: 201 });
-      } catch (e) {
-        return new Response('Username already exists', { status: 409 });
-      }
+  const url = new URL(request.url);
+  const { DB } = env;
+  // Normalize pathname (remove trailing slashes)
+  const pathname = url.pathname.replace(/\/+$/, '');
+    // CORS headers
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    };
+
+    // Handle OPTIONS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response('OK', { status: 200, headers: corsHeaders });
     }
-    if (request.method === 'POST' && url.pathname === '/login') {
-      const { username, password } = await request.json();
-      if (!username || !password) {
-        return new Response('Missing username or password', { status: 400 });
-      }
-      const bcrypt = await import('bcryptjs');
-      const user = await DB.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
-      if (!user) {
-        return new Response('Invalid credentials', { status: 401 });
-      }
-      const valid = bcrypt.compareSync(password, user.password_hash);
-      if (!valid) {
-        return new Response('Invalid credentials', { status: 401 });
-      }
-      // For simplicity, return success (JWT/session can be added later)
-      return new Response('Login successful', { status: 200 });
+  if (request.method === 'POST' && pathname === '/register') {
+    const { username, password } = await request.json();
+    if (!username || !password) {
+      return new Response('Missing username or password', { status: 400, headers: corsHeaders });
     }
+    // Hash password using Web Crypto API
+    const encoder = new TextEncoder();
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const pwKey = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+    const hashBuffer = await crypto.subtle.deriveBits({
+      name: 'PBKDF2',
+      salt,
+      iterations: 100000,
+      hash: 'SHA-256'
+    }, pwKey, 256);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join('');
+    const storedHash = `${saltHex}:${hashHex}`;
+    try {
+      await DB.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)').bind(username, storedHash).run();
+      return new Response('User registered', { status: 201, headers: corsHeaders });
+    } catch (e) {
+      return new Response('Username already exists', { status: 409, headers: corsHeaders });
+    }
+  }
+  if (request.method === 'POST' && pathname === '/login') {
+    const { username, password } = await request.json();
+    if (!username || !password) {
+      return new Response('Missing username or password', { status: 400, headers: corsHeaders });
+    }
+    const user = await DB.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
+    if (!user) {
+      return new Response('Invalid credentials', { status: 401, headers: corsHeaders });
+    }
+    // Verify password using Web Crypto API
+    const [saltHex, hashHex] = user.password_hash.split(':');
+    const encoder = new TextEncoder();
+    const salt = new Uint8Array(saltHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+    const pwKey = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+    const hashBuffer = await crypto.subtle.deriveBits({
+      name: 'PBKDF2',
+      salt,
+      iterations: 100000,
+      hash: 'SHA-256'
+    }, pwKey, 256);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const inputHashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    if (inputHashHex !== hashHex) {
+      return new Response('Invalid credentials', { status: 401, headers: corsHeaders });
+    }
+    // For simplicity, return success (JWT/session can be added later)
+    return new Response('Login successful', { status: 200, headers: corsHeaders });
+  }
       // Store measurement
-      if (request.method === 'POST' && url.pathname === '/measurements') {
+  if (request.method === 'POST' && pathname === '/measurements') {
         const { username, systolic, diastolic, heart_rate } = await request.json();
         if (!username || !systolic || !diastolic || !heart_rate) {
-          return new Response('Missing data', { status: 400 });
+            return new Response('Missing data', { status: 400, headers: corsHeaders });
         }
         const user = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
         if (!user) {
-          return new Response('User not found', { status: 404 });
+            return new Response('User not found', { status: 404, headers: corsHeaders });
         }
         const timestamp = new Date().toISOString();
         await DB.prepare('INSERT INTO measurements (user_id, systolic, diastolic, heart_rate, timestamp) VALUES (?, ?, ?, ?, ?)')
           .bind(user.id, systolic, diastolic, heart_rate, timestamp).run();
-        return new Response('Measurement stored', { status: 201 });
+          return new Response('Measurement stored', { status: 201, headers: corsHeaders });
       }
       // Calculate average blood pressure
-      if (request.method === 'GET' && url.pathname === '/average') {
+  if (request.method === 'GET' && pathname === '/average') {
         const username = url.searchParams.get('username');
         if (!username) {
-          return new Response('Missing username', { status: 400 });
+            return new Response('Missing username', { status: 400, headers: corsHeaders });
         }
         const user = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
         if (!user) {
-          return new Response('User not found', { status: 404 });
+            return new Response('User not found', { status: 404, headers: corsHeaders });
         }
         const result = await DB.prepare('SELECT AVG(systolic) AS avg_systolic, AVG(diastolic) AS avg_diastolic FROM measurements WHERE user_id = ?')
           .bind(user.id).first();
-        return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
-    return new Response('Hello World!');
+      return new Response('Hello World!', { headers: corsHeaders });
   }
 };

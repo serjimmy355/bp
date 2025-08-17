@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 
-const API_BASE = 'https://bp-worker.jimross355.workers.dev/'; // Replace with your deployed Worker URL
+const API_BASE = 'https://bp-worker.jimross355.workers.dev'; // Replace with your deployed Worker URL
 
 function App() {
   // Navigation state
