@@ -60,10 +60,16 @@ function App() {
   const submitMeasurement = async (e) => {
     e.preventDefault();
     setMessage('');
+    // Log the payload and URL for debugging
+    const payload = { username, systolic, diastolic, heart_rate: heartRate };
+    console.log('Submitting measurement:', {
+      url: `${API_BASE}/measurements`,
+      payload
+    });
     const res = await fetch(`${API_BASE}/measurements`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, systolic, diastolic, heart_rate: heartRate })
+      body: JSON.stringify(payload)
     });
     const data = await res.json().catch(() => ({}));
     setMessage(data.message || data.error || '');
