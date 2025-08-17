@@ -201,3 +201,27 @@ tbody tr:hover { background: #18213a; }
 /* Misc */
 .card { padding: 2em; }
 .read-the-docs { color: var(--muted); }
+
+button[type="submit"] {
+  width: 70%;
+  align-self: center;      /* center this flex item in the form */
+  /* or use margins instead: margin: 8px auto 0; */
+}
+
+/* Table action buttons */
+table button {
+  width: auto;                 /* shrink to fit text */
+  padding: 0.4em 0.9em;        /* smaller padding */
+  font-size: 0.9rem;           /* a bit smaller text */
+  border-radius: 8px;          /* less chunky */
+  margin: 0;                   /* remove top margin */
+  display: inline-block;
+}
+
+table button {
+  background: var(--danger);
+}
+
+table button:hover {
+  background: #e05555;         /* slightly darker red */
+}
