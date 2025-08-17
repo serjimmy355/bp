@@ -1,35 +1,170 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+
+
+import { useState, useEffect } from 'react';
+import './App.css';
+
+const API_BASE = 'https://bp-worker.jimross355.workers.dev/'; // Replace with your deployed Worker URL
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [token, setToken] = useState('');
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [message, setMessage] = useState('');
+  const [systolic, setSystolic] = useState('');
+  const [diastolic, setDiastolic] = useState('');
+  const [heartRate, setHeartRate] = useState('');
+  const [average, setAverage] = useState(null);
+  const [measurements, setMeasurements] = useState([]);
+
+  const register = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    const res = await fetch(`${API_BASE}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    setMessage(await res.text());
+  };
+
+  const login = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    const res = await fetch(`${API_BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setToken(data.token);
+      setLoggedIn(true);
+      setMessage('Logged in!');
+      fetchMeasurements(data.token);
+    } else {
+      setMessage(await res.text());
+    }
+  };
+
+  const submitMeasurement = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    const res = await fetch(`${API_BASE}/measurements`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ systolic, diastolic, heart_rate: heartRate })
+    });
+    setMessage(await res.text());
+    fetchMeasurements(token);
+  };
+
+  const fetchMeasurements = async (jwt) => {
+    const res = await fetch(`${API_BASE}/measurements`, {
+      headers: { 'Authorization': `Bearer ${jwt}` }
+    });
+    if (res.ok) {
+      setMeasurements(await res.json());
+    }
+  };
+
+  const deleteMeasurement = async (id) => {
+    const res = await fetch(`${API_BASE}/measurements`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ id })
+    });
+    setMessage(await res.text());
+    fetchMeasurements(token);
+  };
+
+  const exportCSV = async () => {
+    const res = await fetch(`${API_BASE}/export`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const csv = await res.text();
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'measurements.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
+  const getAverage = async () => {
+    setMessage('');
+    const res = await fetch(`${API_BASE}/average`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      setAverage(await res.json());
+    } else {
+      setMessage(await res.text());
+    }
+  };
+
+  useEffect(() => {
+    if (loggedIn && token) {
+      fetchMeasurements(token);
+    }
+  }, [loggedIn, token]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="container">
+      <h1>Blood Pressure & Heart Rate Tracker</h1>
+      <form onSubmit={register}>
+        <h2>Register</h2>
+        <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
+        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+        <button type="submit">Register</button>
+      </form>
+      <form onSubmit={login}>
+        <h2>Login</h2>
+        <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
+        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+        <button type="submit">Login</button>
+      </form>
+      {loggedIn && (
+        <>
+          <form onSubmit={submitMeasurement}>
+            <h2>Enter Measurement</h2>
+            <input placeholder="Systolic" value={systolic} onChange={e => setSystolic(e.target.value)} />
+            <input placeholder="Diastolic" value={diastolic} onChange={e => setDiastolic(e.target.value)} />
+            <input placeholder="Heart Rate" value={heartRate} onChange={e => setHeartRate(e.target.value)} />
+            <button type="submit">Submit</button>
+          </form>
+          <button onClick={getAverage}>Get Average</button>
+          {average && (
+            <div>
+              <h3>Average Blood Pressure</h3>
+              <p>Systolic: {average.avg_systolic?.toFixed(2)}</p>
+              <p>Diastolic: {average.avg_diastolic?.toFixed(2)}</p>
+            </div>
+          )}
+          <h2>Measurements</h2>
+          <button onClick={exportCSV}>Export to CSV</button>
+          <ul>
+            {measurements.map(m => (
+              <li key={m.id}>
+                {m.timestamp}: {m.systolic}/{m.diastolic} mmHg, HR: {m.heart_rate}
+                <button onClick={() => deleteMeasurement(m.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {message && <p>{message}</p>}
+    </div>
+  );
 }
 
-export default App
+export default App;
