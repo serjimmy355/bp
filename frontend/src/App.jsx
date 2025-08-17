@@ -239,12 +239,20 @@ function App() {
           <button onClick={logout} style={{ float: 'right', marginBottom: '12px' }}>Logout</button>
           <form onSubmit={submitMeasurement}>
             <h2>Enter Measurement</h2>
-            <label htmlFor="systolic">Systolic</label>
-            <input id="systolic" name="systolic" placeholder="Systolic" value={systolic} onChange={e => setSystolic(e.target.value)} />
-            <label htmlFor="diastolic">Diastolic</label>
-            <input id="diastolic" name="diastolic" placeholder="Diastolic" value={diastolic} onChange={e => setDiastolic(e.target.value)} />
-            <label htmlFor="heart-rate">Heart Rate</label>
-            <input id="heart-rate" name="heart-rate" placeholder="Heart Rate" value={heartRate} onChange={e => setHeartRate(e.target.value)} />
+            <div className="measurement-row">
+              <div className="input-group">
+                <label htmlFor="systolic">Systolic</label>
+                <input id="systolic" name="systolic" placeholder="Systolic" value={systolic} onChange={e => setSystolic(e.target.value)} />
+              </div>
+              <div className="input-group">
+                <label htmlFor="diastolic">Diastolic</label>
+                <input id="diastolic" name="diastolic" placeholder="Diastolic" value={diastolic} onChange={e => setDiastolic(e.target.value)} />
+              </div>
+              <div className="input-group">
+                <label htmlFor="heart-rate">Heart Rate</label>
+                <input id="heart-rate" name="heart-rate" placeholder="Heart Rate" value={heartRate} onChange={e => setHeartRate(e.target.value)} />
+              </div>
+            </div>
             <button type="submit">Submit</button>
           </form>
           <button onClick={getAverage}>Get Average</button>

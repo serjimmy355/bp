@@ -71,6 +71,37 @@ form {
   align-items: stretch;
 }
 
+.measurement-row {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 120px;
+}
+
+.input-group label {
+  margin-bottom: 4px;
+  font-size: 0.98rem;
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+  .measurement-row {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .input-group {
+    min-width: 0;
+  }
+}
+
 input, select, textarea {
   height: 46px;
   padding: 0 12px;
