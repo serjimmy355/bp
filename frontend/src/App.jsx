@@ -255,7 +255,10 @@ function App() {
             </div>
             <button type="submit">Submit</button>
           </form>
-          <button onClick={getAverage}>Get Average</button>
+          <div className="action-row">
+            <button onClick={getAverage}>Get Average</button>
+            <button onClick={exportCSV} style={{ marginLeft: 'auto' }}>Export to CSV</button>
+          </div>
           {average && (
             <div>
               <h3>Average Blood Pressure</h3>
@@ -265,7 +268,6 @@ function App() {
           )}
           <div className="message-container">
             <h2>Measurements</h2>
-            <button onClick={exportCSV}>Export to CSV</button>
             {selectedIds.length > 0 && (
               <button onClick={deleteSelected} style={{ marginLeft: '12px', background: 'var(--danger)' }}>Delete Selected</button>
             )}

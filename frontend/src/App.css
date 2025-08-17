@@ -71,6 +71,29 @@ form {
   align-items: stretch;
 }
 
+.action-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.action-row button {
+  min-width: 120px;
+}
+.action-row button:last-child {
+  margin-left: auto;
+}
+
+@media (max-width: 600px) {
+  .action-row {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .action-row button:last-child {
+    margin-left: 0;
+  }
+}
 .measurement-row {
   display: flex;
   gap: 18px;
