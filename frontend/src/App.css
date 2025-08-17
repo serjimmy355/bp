@@ -71,23 +71,6 @@ form {
   align-items: stretch;
 }
 
-.action-row {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  margin-bottom: 18px;
-  justify-content: center;
-  margin-top: 0;
-}
-.action-row button {
-  width: 35%;
-  min-width: 120px;
-  padding: 0.7em 1.2em;
-  font-size: 1.08rem;
-  max-width: 400px;
-  white-space: nowrap;
-}
-
 .measurement-row {
   display: flex;
   gap: 18px;
@@ -169,6 +152,11 @@ button:hover { background: var(--accent-hover); }
 button:active { transform: translateY(1px); }
 button:disabled { opacity: .6; cursor: not-allowed; }
 
+/* Headings */
+h1, h2, h3 {
+  color: var(--text);
+  margin: 0 0 .6em;
+}
 
 /* Table */
 table {
@@ -266,6 +254,11 @@ tbody tr:hover { background: #18213a; }
 .card { padding: 2em; }
 .read-the-docs { color: var(--muted); }
 
+button[type="submit"] {
+  width: 70%;
+  align-self: center;      /* center this flex item in the form */
+  /* or use margins instead: margin: 8px auto 0; */
+}
 
 /* Table action buttons */
 table button {
@@ -284,11 +277,3 @@ table button {
 table button:hover {
   background: #e05555;         /* slightly darker red */
 }
-.action-row {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  margin-bottom: 18px;
-  justify-content: center;
-}
-
