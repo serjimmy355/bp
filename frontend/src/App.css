@@ -15,8 +15,7 @@
 /* ✅ universal box-sizing (fixes mobile overflow) */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* ✅ never allow horizontal scroll */
-html, body { overflow-x: hidden; }
+
 
 button {
   background: var(--accent);
@@ -302,3 +301,15 @@ table button:hover { background: #e05555; }
 
 /* ✅ belts & braces: media/content never overflow parent width */
 img, table { max-width: 100%; height: auto; }
+/* Stop any flex child from blowing the container wider */
+.container > * { min-width: 0; }
+
+/* Responsive table wrapper */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Let the table be wider than the viewport and scroll inside the wrapper */
+.table-wrap table { min-width: 600px; } /* tweak if you want */

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import logo from './assets/logo.svg';
 
-const API_BASE = 'https://bp-worker.jimross355.workers.dev'; // Replace with your deployed Worker URL
+const API_BASE = 'https://bp-worker.jimross355.workers.dev';
 
 function App() {
   // Navigation state
@@ -188,20 +188,31 @@ function App() {
     <div className="container">
       {/* Centered logo + optional logout (no floats) */}
       <div className="topbar">
-      <img className="app-logo" src={logo} alt="Blood Pressure & Heart Rate Tracker" />
-      {loggedIn && <button className="logout-btn" onClick={logout}>Logout</button>}
-    </div>
+        <img className="app-logo" src={logo} alt="Blood Pressure & Heart Rate Tracker" />
+        {loggedIn && <button className="logout-btn" onClick={logout}>Logout</button>}
+      </div>
 
       {!loggedIn ? (
         page === 'register' ? (
           <form onSubmit={register}>
             <h2>Register</h2>
             <label htmlFor="register-username">Username</label>
-            <input id="register-username" name="register-username" placeholder="Username"
-                   value={regUsername} onChange={e => setRegUsername(e.target.value)} />
+            <input
+              id="register-username"
+              name="register-username"
+              placeholder="Username"
+              value={regUsername}
+              onChange={e => setRegUsername(e.target.value)}
+            />
             <label htmlFor="register-password">Password</label>
-            <input id="register-password" name="register-password" type="password" placeholder="Password"
-                   value={regPassword} onChange={e => setRegPassword(e.target.value)} />
+            <input
+              id="register-password"
+              name="register-password"
+              type="password"
+              placeholder="Password"
+              value={regPassword}
+              onChange={e => setRegPassword(e.target.value)}
+            />
             <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
               <button type="submit">Register</button>
               <button type="button" onClick={() => setPage('login')}>Back to Login</button>
@@ -211,11 +222,22 @@ function App() {
           <form onSubmit={login}>
             <h2>Login</h2>
             <label htmlFor="login-username">Username</label>
-            <input id="login-username" name="login-username" placeholder="Username"
-                   value={username} onChange={e => setUsername(e.target.value)} />
+            <input
+              id="login-username"
+              name="login-username"
+              placeholder="Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+            />
             <label htmlFor="login-password">Password</label>
-            <input id="login-password" name="login-password" type="password" placeholder="Password"
-                   value={password} onChange={e => setPassword(e.target.value)} />
+            <input
+              id="login-password"
+              name="login-password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
             <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
               <button type="submit">Login</button>
               <button type="button" onClick={() => setPage('register')}>Register</button>
@@ -229,18 +251,33 @@ function App() {
             <div className="measurement-row">
               <div className="input-group">
                 <label htmlFor="systolic">Systolic</label>
-                <input id="systolic" name="systolic" placeholder="Systolic"
-                       value={systolic} onChange={e => setSystolic(e.target.value)} />
+                <input
+                  id="systolic"
+                  name="systolic"
+                  placeholder="Systolic"
+                  value={systolic}
+                  onChange={e => setSystolic(e.target.value)}
+                />
               </div>
               <div className="input-group">
                 <label htmlFor="diastolic">Diastolic</label>
-                <input id="diastolic" name="diastolic" placeholder="Diastolic"
-                       value={diastolic} onChange={e => setDiastolic(e.target.value)} />
+                <input
+                  id="diastolic"
+                  name="diastolic"
+                  placeholder="Diastolic"
+                  value={diastolic}
+                  onChange={e => setDiastolic(e.target.value)}
+                />
               </div>
               <div className="input-group">
                 <label htmlFor="heart-rate">Heart Rate</label>
-                <input id="heart-rate" name="heart-rate" placeholder="Heart Rate"
-                       value={heartRate} onChange={e => setHeartRate(e.target.value)} />
+                <input
+                  id="heart-rate"
+                  name="heart-rate"
+                  placeholder="Heart Rate"
+                  value={heartRate}
+                  onChange={e => setHeartRate(e.target.value)}
+                />
               </div>
             </div>
             <button type="submit">Submit</button>
@@ -256,48 +293,57 @@ function App() {
 
           <div className="message-container">
             <h2>Measurements</h2>
+
             {selectedIds.length > 0 && (
               <button className="delete" onClick={deleteSelected} style={{ marginLeft: '12px' }}>
                 Delete Selected
               </button>
             )}
 
-            <table>
-              <thead>
-                <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.length === measurements.length && measurements.length > 0}
-                      onChange={handleSelectAll}
-                    />
-                  </th>
-                  <th>Timestamp</th>
-                  <th>Systolic</th>
-                  <th>Diastolic</th>
-                  <th>Heart Rate</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {measurements.map(m => (
-                  <tr key={m.id}>
-                    <td>
+            {/* table scroll wrapper */}
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
                       <input
                         type="checkbox"
-                        checked={selectedIds.includes(m.id)}
-                        onChange={e => handleSelectOne(m.id, e)}
+                        checked={selectedIds.length === measurements.length && measurements.length > 0}
+                        onChange={handleSelectAll}
                       />
-                    </td>
-                    <td>{new Date(m.timestamp).toLocaleString()}</td>
-                    <td>{m.systolic}</td>
-                    <td>{m.diastolic}</td>
-                    <td>{m.heart_rate}</td>
-                    <td><button onClick={() => deleteMeasurement(m.id)}>Delete</button></td>
+                    </th>
+                    <th>Timestamp</th>
+                    <th>Systolic</th>
+                    <th>Diastolic</th>
+                    <th>Heart Rate</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {measurements.map(m => (
+                    <tr key={m.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(m.id)}
+                          onChange={e => handleSelectOne(m.id, e)}
+                        />
+                      </td>
+                      <td>{new Date(m.timestamp).toLocaleString()}</td>
+                      <td>{m.systolic}</td>
+                      <td>{m.diastolic}</td>
+                      <td>{m.heart_rate}</td>
+                      <td>
+                        <button className="delete" onClick={() => deleteMeasurement(m.id)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             {/* Even-flex, capped width action buttons */}
             <div className="action-row">
