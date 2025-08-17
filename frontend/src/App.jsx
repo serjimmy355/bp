@@ -264,7 +264,7 @@ function App() {
           )}
           <div className="message-container">
             <h2>Measurements</h2>
-            <button onClick={exportCSV}>CSV ⬇</button>
+            {/* CSV button will be moved below the table */}
             {selectedIds.length > 0 && (
               <button onClick={deleteSelected} style={{ marginLeft: '12px', background: 'var(--danger)' }}>Delete Selected</button>
             )}
@@ -304,8 +304,9 @@ function App() {
                 ))}
               </tbody>
             </table>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '18px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginTop: '18px' }}>
               <button onClick={getAverage} style={{ whiteSpace: 'nowrap', width: '70%' }}>Get Average</button>
+              <button onClick={exportCSV} style={{ whiteSpace: 'nowrap', width: '70%' }}>CSV ⬇</button>
             </div>
             {/* Message will only be rendered once below */}
           </div>
