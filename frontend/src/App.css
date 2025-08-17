@@ -307,3 +307,18 @@ table button {
 table button:hover {
   background: #e05555;         /* slightly darker red */
 }
+.action-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+  justify-content: center;
+}
+
+.action-row button {
+  flex: 1;              /* both share space evenly */
+  min-width: 140px;     /* stop them shrinking too far */
+  max-width: 70%;       /* never wider than submit button above */
+  font-size: 1.08rem;
+  padding: 0.7em 1.2em;
+}
