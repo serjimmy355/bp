@@ -10,6 +10,19 @@
 
 export default {
   async fetch(request, env, ctx) {
+  // Get all measurements for a user
+  if (request.method === 'GET' && pathname === '/measurements') {
+    const username = url.searchParams.get('username');
+    if (!username) {
+      return new Response(JSON.stringify({ error: 'Missing username' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const user = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'User not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const measurements = await DB.prepare('SELECT id, systolic, diastolic, heart_rate, timestamp FROM measurements WHERE user_id = ? ORDER BY timestamp DESC').bind(user.id).all();
+    return new Response(JSON.stringify(measurements.results), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
   const url = new URL(request.url);
   const { DB } = env;
   // Normalize pathname (remove trailing slashes)
@@ -46,7 +59,7 @@ export default {
     const storedHash = `${saltHex}:${hashHex}`;
     try {
       await DB.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)').bind(username, storedHash).run();
-      return new Response('User registered', { status: 201, headers: corsHeaders });
+  return new Response(JSON.stringify({ message: 'User registered' }), { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     } catch (e) {
       return new Response('Username already exists', { status: 409, headers: corsHeaders });
     }
@@ -77,22 +90,25 @@ export default {
       return new Response('Invalid credentials', { status: 401, headers: corsHeaders });
     }
     // For simplicity, return success (JWT/session can be added later)
-    return new Response('Login successful', { status: 200, headers: corsHeaders });
+    return new Response(JSON.stringify({ message: 'Login successful' }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
       // Store measurement
   if (request.method === 'POST' && pathname === '/measurements') {
         const { username, systolic, diastolic, heart_rate } = await request.json();
         if (!username || !systolic || !diastolic || !heart_rate) {
-            return new Response('Missing data', { status: 400, headers: corsHeaders });
+            return new Response(JSON.stringify({ error: 'Missing data' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
         const user = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
         if (!user) {
-            return new Response('User not found', { status: 404, headers: corsHeaders });
+            return new Response(JSON.stringify({ error: 'User not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
         const timestamp = new Date().toISOString();
         await DB.prepare('INSERT INTO measurements (user_id, systolic, diastolic, heart_rate, timestamp) VALUES (?, ?, ?, ?, ?)')
           .bind(user.id, systolic, diastolic, heart_rate, timestamp).run();
-          return new Response('Measurement stored', { status: 201, headers: corsHeaders });
+        return new Response(JSON.stringify({ message: 'Measurement stored' }), { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
       // Calculate average blood pressure
   if (request.method === 'GET' && pathname === '/average') {
@@ -108,6 +124,6 @@ export default {
           .bind(user.id).first();
           return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
-      return new Response('Hello World!', { headers: corsHeaders });
+  return new Response(JSON.stringify({ message: 'Not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 };
