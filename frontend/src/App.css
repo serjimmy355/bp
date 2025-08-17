@@ -1,0 +1,279 @@
+:root {
+  --bg: #101624;
+  --panel: #161e2e;
+  --border: #232a3a;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --danger: #e05555;
+  --input: #19213a;
+  --input-border: #2c3550;
+  --input-focus: #3b82f6;
+  --text: #eaf1fb;
+  --muted: #7d88a1;
+}/* Clean, modern, error-free stylesheet for your app */
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.7em 1.2em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, transform .02s;
+  margin-top: 8px;
+}
+
+button.delete {
+  background: var(--danger);
+}
+
+button.delete:hover {
+  background: #d32f2f;
+}
+
+button:hover {
+  background: var(--accent-hover);
+}
+*::before,
+*::after { box-sizing: border-box; }
+
+body {
+  background: radial-gradient(80% 100% at 50% 0%, #0f182c 0%, var(--bg) 70%);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Container */
+.container {
+  background: linear-gradient(180deg, #161e2e 0%, var(--panel) 100%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.45);
+  padding: 40px 32px 36px;
+  max-width: 100%;
+  margin: 48px auto;
+  min-height: 540px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Forms */
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.measurement-row {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 120px;
+}
+
+.input-group label {
+  margin-bottom: 4px;
+  font-size: 0.98rem;
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+  .measurement-row {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .input-group {
+    min-width: 0;
+  }
+}
+
+input, select, textarea {
+  height: 46px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  background: var(--input);
+  color: var(--text);
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+textarea { height: auto; padding: 12px; resize: vertical; min-height: 90px; }
+
+input::placeholder { color: #7d88a1; }
+
+input:focus,
+input:focus-visible,
+select:focus,
+textarea:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(75,134,255,.25);
+}
+
+/* Buttons */
+button {
+  width: 70%;
+  font-size: 1.08rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.7em 1.2em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, transform .02s, opacity .15s;
+  margin-top: 8px;
+}
+
+.button-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+button:hover { background: var(--accent-hover); }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Headings */
+h1, h2, h3 {
+  color: var(--text);
+  margin: 0 0 .6em;
+}
+
+/* Table */
+table {
+  width: 100%;
+  max-width: 700px;
+  border-collapse: collapse;
+  margin: 1rem auto 0 auto;
+  background: var(--panel);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border-radius: 12px;
+  overflow: hidden; /* ensure rounded corners clip */
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+th {
+  background: #19213a;
+  font-weight: 600;
+}
+
+tbody tr { background: var(--panel); }
+tbody tr:hover { background: #18213a; }
+
+/* Messages */
+.err {
+  min-height: 1.1rem;
+  margin-top: 18px;
+  font-size: 1rem;
+  background: var(--panel);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.25);
+  padding: 18px 32px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  color: var(--danger);
+}
+
+.err.success {
+  color: #2ecc40;
+  background: var(--panel);
+}
+
+/* Vite/React boilerplate theming */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover { filter: drop-shadow(0 0 2em #646cffaa); }
+.logo.react:hover { filter: drop-shadow(0 0 2em #61dafbaa); }
+
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo { animation: logo-spin infinite 20s linear; }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    max-width: 98vw;
+    padding: 18px 6vw 18px;
+    min-height: 320px;
+    border-radius: 12px;
+  }
+  form { gap: 10px; }
+  input, select, textarea, button {
+    font-size: 1rem;
+    height: 42px;
+    padding: 0 10px;
+  }
+  h1, h2, h3 { font-size: 1.2rem; }
+}
+
+/* Misc */
+.card { padding: 2em; }
+.read-the-docs { color: var(--muted); }
+
+button[type="submit"] {
+  width: 70%;
+  align-self: center;      /* center this flex item in the form */
+  /* or use margins instead: margin: 8px auto 0; */
+}
+
+/* Table action buttons */
+table button {
+  width: auto;                 /* shrink to fit text */
+  padding: 0.4em 0.9em;        /* smaller padding */
+  font-size: 0.9rem;           /* a bit smaller text */
+  border-radius: 8px;          /* less chunky */
+  margin: 0;                   /* remove top margin */
+  display: inline-block;
+}
+
+table button {
+  background: var(--danger);
+}
+
+table button:hover {
+  background: #e05555;         /* slightly darker red */
+}
