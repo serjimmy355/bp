@@ -22,6 +22,30 @@ function App() {
   const [heartRate, setHeartRate] = useState('');
   const [average, setAverage] = useState(null);
   const [measurements, setMeasurements] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
+  // Handle select all
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedIds(measurements.map(m => m.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  // Handle select one
+  const handleSelectOne = (id) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  // Bulk delete
+  const deleteSelected = async () => {
+    for (const id of selectedIds) {
+      await deleteMeasurement(id);
+    }
+    setSelectedIds([]);
+  };
 
   const register = async (e) => {
     e.preventDefault();
@@ -184,9 +208,19 @@ function App() {
           )}
           <h2>Measurements</h2>
           <button onClick={exportCSV}>Export to CSV</button>
+          {selectedIds.length > 0 && (
+            <button onClick={deleteSelected} style={{ marginLeft: '12px', background: 'var(--danger)' }}>Delete Selected</button>
+          )}
           <table>
             <thead>
               <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.length === measurements.length && measurements.length > 0}
+                    onChange={handleSelectAll}
+                  />
+                </th>
                 <th>Timestamp</th>
                 <th>Systolic</th>
                 <th>Diastolic</th>
@@ -197,6 +231,13 @@ function App() {
             <tbody>
               {measurements.map(m => (
                 <tr key={m.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(m.id)}
+                      onChange={() => handleSelectOne(m.id)}
+                    />
+                  </td>
                   <td>{new Date(m.timestamp).toLocaleString()}</td>
                   <td>{m.systolic}</td>
                   <td>{m.diastolic}</td>
