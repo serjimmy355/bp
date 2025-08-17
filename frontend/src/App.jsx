@@ -61,11 +61,26 @@ function App() {
     }
   };
 
-  // Handle select one
-  const handleSelectOne = (id) => {
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+  // Shift-click bulk select support
+  const [lastChecked, setLastChecked] = useState(null);
+  const handleSelectOne = (id, e) => {
+    if (e.shiftKey && lastChecked !== null && lastChecked !== id) {
+      const ids = measurements.map(m => m.id);
+      const start = ids.indexOf(lastChecked);
+      const end = ids.indexOf(id);
+      const [min, max] = [Math.min(start, end), Math.max(start, end)];
+      const range = ids.slice(min, max + 1);
+      setSelectedIds(prev => {
+        const newSet = new Set(prev);
+        range.forEach(rid => newSet.add(rid));
+        return Array.from(newSet);
+      });
+    } else {
+      setSelectedIds(prev =>
+        prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      );
+      setLastChecked(id);
+    }
   };
 
   // Bulk delete
@@ -269,7 +284,7 @@ function App() {
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(m.id)}
-                      onChange={() => handleSelectOne(m.id)}
+                      onChange={e => handleSelectOne(m.id, e)}
                     />
                   </td>
                   <td>{new Date(m.timestamp).toLocaleString()}</td>
@@ -283,7 +298,7 @@ function App() {
           </table>
         </>
       )}
-      {message && <p>{message}</p>}
+  {message && <div className="err">{message}</div>}
     </div>
   );
 }
