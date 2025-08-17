@@ -10,7 +10,13 @@
   --input-focus: #3b82f6;
   --text: #eaf1fb;
   --muted: #7d88a1;
-}/* Clean, modern, error-free stylesheet for your app */
+
+  /* layout gutter for breathing room */
+  --gutter: 16px;
+}
+@media (max-width: 600px) {
+  :root { --gutter: 12px; }
+}
 
 /* Universal box-sizing (prevents padding making things overflow) */
 *, *::before, *::after { box-sizing: border-box; }
@@ -38,21 +44,33 @@ body {
   min-height: 100vh;
 }
 
-/* Container */
+/* Root wrapper gets outer gutters so the card never touches the edge */
+#root {
+  width: 100%;
+  padding: clamp(12px, 4vw, 24px);
+  text-align: center;
+  margin: 0 auto;
+  max-width: 1280px;
+}
+
+/* Container (card) */
 .container {
   background: linear-gradient(180deg, #161e2e 0%, var(--panel) 100%);
   border: 1px solid var(--border);
   border-radius: 20px;
   box-shadow: 0 16px 48px rgba(0,0,0,.45);
   padding: 40px 32px 36px;
-  max-width: 100%;
-  margin: 48px auto;
+  width: min(720px, 100% - (var(--gutter) * 2)); /* <= key: gutters + no overhang */
+  margin-inline: auto;
   min-height: 540px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
+
+/* Let direct children shrink so nothing forces horizontal overflow */
+.container > * { min-width: 0; }
 
 /* Top bar */
 .topbar {
@@ -139,15 +157,7 @@ textarea:focus {
 button {
   width: 70%;
   font-size: 1.08rem;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 0.7em 1.2em;
-  font-weight: 700;
-  cursor: pointer;
   transition: background .15s, transform .02s, opacity .15s;
-  margin-top: 8px;
 }
 .button-row {
   display: flex;
@@ -185,7 +195,7 @@ h1, h2, h3 {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;             /* remove auto side margins */
+  margin-top: 1rem;
   background: var(--panel);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   border-radius: 12px;
@@ -221,32 +231,9 @@ tbody tr:hover { background: #18213a; }
 }
 .err.success { color: #2ecc40; background: var(--panel); }
 
-/* Vite/React boilerplate theming */
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover { filter: drop-shadow(0 0 2em #646cffaa); }
-.logo.react:hover { filter: drop-shadow(0 0 2em #61dafbaa); }
-@keyframes logo-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo { animation: logo-spin infinite 20s linear; }
-}
-
 /* ---------- Responsive fixes for mobile overflow ---------- */
 
-/* Let flex children shrink so they don't force the card wider */
-.container > * { min-width: 0; }
-
-/* The Measurements block should use full card width */
+/* Measurements block uses full card width */
 .message-container { width: 100%; }
 
 /* Horizontal scroll lives in this wrapper only */
@@ -266,8 +253,9 @@ tbody tr:hover { background: #18213a; }
 
 @media (max-width: 600px) {
   .container {
-    max-width: 100vw;          /* never wider than viewport */
-    padding: 18px 4vw 18px;    /* viewport-safe padding */
+    /* full-width within gutters, never overhangs */
+    width: min(720px, 100vw - (var(--gutter) * 2));
+    padding: 18px 4vw 18px;
     margin: 24px auto;
     border-radius: 12px;
   }
@@ -294,6 +282,13 @@ tbody tr:hover { background: #18213a; }
   .table-wrap table { min-width: 560px; }
 }
 
+/* Optional: Android dynamic viewport fix */
+@supports (width: 100dvw) {
+  @media (max-width: 600px) {
+    .container { width: min(720px, 100dvw - (var(--gutter) * 2)); }
+  }
+}
+
 /* Misc */
 .card { padding: 2em; }
 .read-the-docs { color: var(--muted); }
@@ -318,3 +313,50 @@ table button:hover { background: #e05555; }
 
 /* Media should never overflow parent width */
 img { max-width: 100%; height: auto; }
+/* ---- Fit-to-device width + local table scrolling ---- */
+
+/* single place to control side padding */
+:root { --gutter: 16px; }
+@media (max-width: 400px) { :root { --gutter: 12px; } }
+
+/* make the outer page never exceed the viewport width */
+html, body, #root {
+  width: 100%;
+  max-width: 100vw;     /* hard cap */
+  margin: 0;
+  padding: 0;
+}
+
+/* give the page some breathing room */
+#root { padding-inline: var(--gutter); }
+
+/* the card: exactly viewport minus gutters (no overhang) */
+.container {
+  width: calc(100vw - var(--gutter) * 2);
+  max-width: 720px;           /* desktop cap */
+  margin-inline: auto;        /* center it */
+}
+
+/* iOS/Android dynamic viewport fix (avoids 1–2px right gap on some phones) */
+@supports (width: 100dvw) {
+  .container { width: calc(100dvw - var(--gutter) * 2); }
+}
+
+/* let children shrink so nothing pushes the card wider */
+.container > * { min-width: 0; }
+
+/* table only scrolls inside its own wrapper */
+.message-container { width: 100%; }
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;             /* horizontal scroll lives here */
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-wrap table {
+  width: 100%;
+  max-width: none;              /* don't cap inside wrapper */
+  min-width: 560px;             /* give columns room; tweak as you like */
+  margin: 1rem 0 0;             /* no side auto-margins */
+}
