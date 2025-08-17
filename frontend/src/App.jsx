@@ -1,3 +1,17 @@
+  // Logout handler
+  const logout = () => {
+    setLoggedIn(false);
+    setUsername('');
+    setPassword('');
+    setMessage('');
+    setSystolic('');
+    setDiastolic('');
+    setHeartRate('');
+    setAverage(null);
+    setMeasurements([]);
+    setSelectedIds([]);
+    setPage('login');
+  };
 
 
 import { useState, useEffect } from 'react';
@@ -22,6 +36,7 @@ function App() {
   const [heartRate, setHeartRate] = useState('');
   const [average, setAverage] = useState(null);
   const [measurements, setMeasurements] = useState([]);
+  // ...existing code...
   const [selectedIds, setSelectedIds] = useState([]);
   // Handle select all
   const handleSelectAll = (e) => {
@@ -188,6 +203,7 @@ function App() {
         )
       ) : (
         <>
+          <button onClick={logout} style={{ float: 'right', marginBottom: '12px' }}>Logout</button>
           <form onSubmit={submitMeasurement}>
             <h2>Enter Measurement</h2>
             <label htmlFor="systolic">Systolic</label>
