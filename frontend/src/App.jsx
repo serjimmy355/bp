@@ -144,7 +144,9 @@ function App() {
         page === 'register' ? (
           <form onSubmit={register}>
             <h2>Register</h2>
+            <label htmlFor="register-username">Username</label>
             <input id="register-username" name="register-username" placeholder="Username" value={regUsername} onChange={e => setRegUsername(e.target.value)} />
+            <label htmlFor="register-password">Password</label>
             <input id="register-password" name="register-password" type="password" placeholder="Password" value={regPassword} onChange={e => setRegPassword(e.target.value)} />
             <button type="submit">Register</button>
             <button type="button" onClick={() => setPage('login')}>Back to Login</button>
@@ -152,7 +154,9 @@ function App() {
         ) : (
           <form onSubmit={login}>
             <h2>Login</h2>
+            <label htmlFor="login-username">Username</label>
             <input id="login-username" name="login-username" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
+            <label htmlFor="login-password">Password</label>
             <input id="login-password" name="login-password" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
             <button type="submit">Login</button>
             <button type="button" onClick={() => setPage('register')}>Register</button>
@@ -162,8 +166,11 @@ function App() {
         <>
           <form onSubmit={submitMeasurement}>
             <h2>Enter Measurement</h2>
+            <label htmlFor="systolic">Systolic</label>
             <input id="systolic" name="systolic" placeholder="Systolic" value={systolic} onChange={e => setSystolic(e.target.value)} />
+            <label htmlFor="diastolic">Diastolic</label>
             <input id="diastolic" name="diastolic" placeholder="Diastolic" value={diastolic} onChange={e => setDiastolic(e.target.value)} />
+            <label htmlFor="heart-rate">Heart Rate</label>
             <input id="heart-rate" name="heart-rate" placeholder="Heart Rate" value={heartRate} onChange={e => setHeartRate(e.target.value)} />
             <button type="submit">Submit</button>
           </form>
