@@ -55,24 +55,26 @@ body {
   justify-content: center;
 }
 
-/* Top bar with centered logo, optional logout pinned right */
-.topbar {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  margin-bottom: 18px;
-}
-.topbar img {
-  height: 64px;
+/* anchor the absolute logout */
+.container { position: relative; }
+
+/* centred logo */
+.app-logo {
   display: block;
-  margin: 0 auto; /* keep the logo visually centered */
+  height: 64px;
+  margin: 0 auto 18px;
 }
-.topbar button {
+
+/* small logout in the top-right; not affected by the global button width */
+.logout-btn {
   position: absolute;
-  right: 0;               /* logout pinned right without affecting centering */
-  top: 50%;
-  transform: translateY(-50%);
+  top: 12px;
+  right: 12px;
+  width: auto;
+  margin: 0;
+  padding: 0.5em 0.9em;
+  border-radius: 10px;
+  font-size: 0.95rem;
 }
 
 /* Forms */

@@ -188,9 +188,9 @@ function App() {
     <div className="container">
       {/* Centered logo + optional logout (no floats) */}
       <div className="topbar">
-        <img src={logo} alt="Blood Pressure & Heart Rate Tracker" />
-        {loggedIn && <button onClick={logout}>Logout</button>}
-      </div>
+      <img className="app-logo" src={logo} alt="Blood Pressure & Heart Rate Tracker" />
+      {loggedIn && <button className="logout-btn" onClick={logout}>Logout</button>}
+    </div>
 
       {!loggedIn ? (
         page === 'register' ? (
