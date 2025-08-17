@@ -152,10 +152,18 @@ export default {
           return new Response('User not found', { status: 404, headers: corsHeaders });
         }
         const measurements = await DB.prepare('SELECT systolic, diastolic, heart_rate, timestamp FROM measurements WHERE user_id = ? ORDER BY timestamp DESC').bind(user.id).all();
-        // Build CSV string
-        let csv = 'Systolic,Diastolic,Heart Rate,Timestamp\n';
+        // Build CSV string with Date and Time columns
+        let csv = 'Systolic, Diastolic, Heart Rate, Date, Time\n';
         for (const m of measurements.results) {
-          csv += `${m.systolic},${m.diastolic},${m.heart_rate},${m.timestamp}\n`;
+          let date = '';
+          let time = '';
+          if (m.timestamp) {
+            const d = new Date(m.timestamp);
+            // Format date as YYYY-MM-DD for Excel compatibility
+            date = ` ${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth()+1).padStart(2, '0')}-${d.getFullYear()}`;
+            time = d.toISOString().slice(11, 19); // HH:MM:SS
+          }
+          csv += `${m.systolic}, ${m.diastolic}, ${m.heart_rate},${date}, ${time}\n`;
         }
         return new Response(csv, {
           status: 200,
