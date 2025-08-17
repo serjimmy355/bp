@@ -10,29 +10,29 @@
 
 export default {
   async fetch(request, env, ctx) {
-  // Get all measurements for a user
-  if (request.method === 'GET' && pathname === '/measurements') {
-    const username = url.searchParams.get('username');
-    if (!username) {
-      return new Response(JSON.stringify({ error: 'Missing username' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-    const user = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'User not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-    const measurements = await DB.prepare('SELECT id, systolic, diastolic, heart_rate, timestamp FROM measurements WHERE user_id = ? ORDER BY timestamp DESC').bind(user.id).all();
-    return new Response(JSON.stringify(measurements.results), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-  }
-  const url = new URL(request.url);
-  const { DB } = env;
-  // Normalize pathname (remove trailing slashes)
-  const pathname = url.pathname.replace(/\/+$/, '');
+    const url = new URL(request.url);
+    const { DB } = env;
     // CORS headers
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     };
+    // Normalize pathname (remove trailing slashes)
+    const pathname = url.pathname.replace(/\/+$/, '');
+    // Get all measurements for a user
+    if (request.method === 'GET' && pathname === '/measurements') {
+      const username = url.searchParams.get('username');
+      if (!username) {
+        return new Response(JSON.stringify({ error: 'Missing username' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const user = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
+      if (!user) {
+        return new Response(JSON.stringify({ error: 'User not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const measurements = await DB.prepare('SELECT id, systolic, diastolic, heart_rate, timestamp FROM measurements WHERE user_id = ? ORDER BY timestamp DESC').bind(user.id).all();
+      return new Response(JSON.stringify(measurements.results), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     // Handle OPTIONS preflight
     if (request.method === 'OPTIONS') {
