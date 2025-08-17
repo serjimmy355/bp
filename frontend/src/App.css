@@ -1,4 +1,16 @@
-/* Clean, modern, error-free stylesheet for your app */
+:root {
+  --bg: #101624;
+  --panel: #161e2e;
+  --border: #232a3a;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --danger: #e05555;
+  --input: #19213a;
+  --input-border: #2c3550;
+  --input-focus: #3b82f6;
+  --text: #eaf1fb;
+  --muted: #7d88a1;
+}/* Clean, modern, error-free stylesheet for your app */
 
 button {
   background: var(--accent);
