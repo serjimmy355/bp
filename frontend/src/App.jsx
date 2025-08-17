@@ -176,14 +176,28 @@ function App() {
           )}
           <h2>Measurements</h2>
           <button onClick={exportCSV}>Export to CSV</button>
-          <ul>
-            {measurements.map(m => (
-              <li key={m.id}>
-                {m.timestamp}: {m.systolic}/{m.diastolic} mmHg, HR: {m.heart_rate}
-                <button onClick={() => deleteMeasurement(m.id)}>Delete</button>
-              </li>
-            ))}
-          </ul>
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Systolic</th>
+                <th>Diastolic</th>
+                <th>Heart Rate</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {measurements.map(m => (
+                <tr key={m.id}>
+                  <td>{new Date(m.timestamp).toLocaleString()}</td>
+                  <td>{m.systolic}</td>
+                  <td>{m.diastolic}</td>
+                  <td>{m.heart_rate}</td>
+                  <td><button onClick={() => deleteMeasurement(m.id)}>Delete</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </>
       )}
       {message && <p>{message}</p>}
