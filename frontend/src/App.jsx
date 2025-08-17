@@ -255,47 +255,50 @@ function App() {
               <p>Diastolic: {average.avg_diastolic?.toFixed(2)}</p>
             </div>
           )}
-          <h2>Measurements</h2>
-          <button onClick={exportCSV}>Export to CSV</button>
-          {selectedIds.length > 0 && (
-            <button onClick={deleteSelected} style={{ marginLeft: '12px', background: 'var(--danger)' }}>Delete Selected</button>
-          )}
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.length === measurements.length && measurements.length > 0}
-                    onChange={handleSelectAll}
-                  />
-                </th>
-                <th>Timestamp</th>
-                <th>Systolic</th>
-                <th>Diastolic</th>
-                <th>Heart Rate</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {measurements.map(m => (
-                <tr key={m.id}>
-                  <td>
+          <div className="message-container">
+            <h2>Measurements</h2>
+            <button onClick={exportCSV}>Export to CSV</button>
+            {selectedIds.length > 0 && (
+              <button onClick={deleteSelected} style={{ marginLeft: '12px', background: 'var(--danger)' }}>Delete Selected</button>
+            )}
+            <table>
+              <thead>
+                <tr>
+                  <th>
                     <input
                       type="checkbox"
-                      checked={selectedIds.includes(m.id)}
-                      onChange={e => handleSelectOne(m.id, e)}
+                      checked={selectedIds.length === measurements.length && measurements.length > 0}
+                      onChange={handleSelectAll}
                     />
-                  </td>
-                  <td>{new Date(m.timestamp).toLocaleString()}</td>
-                  <td>{m.systolic}</td>
-                  <td>{m.diastolic}</td>
-                  <td>{m.heart_rate}</td>
-                  <td><button onClick={() => deleteMeasurement(m.id)}>Delete</button></td>
+                  </th>
+                  <th>Timestamp</th>
+                  <th>Systolic</th>
+                  <th>Diastolic</th>
+                  <th>Heart Rate</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {measurements.map(m => (
+                  <tr key={m.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(m.id)}
+                        onChange={e => handleSelectOne(m.id, e)}
+                      />
+                    </td>
+                    <td>{new Date(m.timestamp).toLocaleString()}</td>
+                    <td>{m.systolic}</td>
+                    <td>{m.diastolic}</td>
+                    <td>{m.heart_rate}</td>
+                    <td><button onClick={() => deleteMeasurement(m.id)}>Delete</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {message && <div className={`err${message.toLowerCase().includes('success') ? ' success' : ''}`}>{message}</div>}
+          </div>
         </>
       )}
   {message && <div className={`err${message.toLowerCase().includes('success') ? ' success' : ''}`}>{message}</div>}
