@@ -110,6 +110,22 @@ export default {
           .bind(user.id, systolic, diastolic, heart_rate, timestamp).run();
         return new Response(JSON.stringify({ message: 'Measurement stored' }), { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
+    // Delete a measurement
+    if (request.method === 'DELETE' && pathname === '/measurements') {
+      const { id, username } = await request.json();
+      if (!id || !username) {
+        return new Response(JSON.stringify({ error: 'Missing id or username' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const user = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
+      if (!user) {
+        return new Response(JSON.stringify({ error: 'User not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const result = await DB.prepare('DELETE FROM measurements WHERE id = ? AND user_id = ?').bind(id, user.id).run();
+      if (result.changes === 0) {
+        return new Response(JSON.stringify({ error: 'Measurement not found or not deleted' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      return new Response(JSON.stringify({ message: 'Measurement deleted' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
       // Calculate average blood pressure
   if (request.method === 'GET' && pathname === '/average') {
         const username = url.searchParams.get('username');

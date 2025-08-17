@@ -55,6 +55,7 @@ function App() {
     } else {
       setMessage(data.message || data.error || 'Login failed');
     }
+    
   };
 
   const submitMeasurement = async (e) => {
