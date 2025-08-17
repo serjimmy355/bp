@@ -82,9 +82,14 @@ function App() {
   };
 
   const fetchMeasurements = async (usernameParam) => {
-    const res = await fetch(`${API_BASE}/measurements?username=${encodeURIComponent(usernameParam)}`);
+    const url = `${API_BASE}/measurements?username=${encodeURIComponent(usernameParam)}`;
+    console.log('Fetching measurements:', { url, usernameParam });
+    const res = await fetch(url);
     if (res.ok) {
       setMeasurements(await res.json());
+    } else {
+      const data = await res.json().catch(() => ({}));
+      console.warn('Fetch measurements error:', data);
     }
   };
 
