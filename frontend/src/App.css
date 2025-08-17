@@ -34,25 +34,8 @@ h1, h2, h3 {
   color: var(--text);
 }
 
-label {
-  color: #b8c2d8;
-  font-weight: 500;
-  margin: 10px 0 8px;
-  display: block;
-}
 
-input {
-  width: 100%;
-  height: 46px;
-  padding: 0 12px;
-  border-radius: 12px;
-  border: 1px solid var(--input-border);
-  background: var(--input);
-  color: var(--text);
-  outline: none;
-  margin-bottom: 12px;
-  transition: border-color .15s, box-shadow .15s;
-}
+
 
 input:focus {
   border-color: var(--input-focus);
