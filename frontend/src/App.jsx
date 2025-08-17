@@ -256,8 +256,8 @@ function App() {
             <button type="submit">Submit</button>
           </form>
           <div className="action-row">
-            <button onClick={getAverage}>Get Average</button>
-            <button onClick={exportCSV} style={{ marginLeft: 'auto' }}>Export to CSV</button>
+            <button onClick={getAverage} style={{ order: 1 }}>Get Average</button>
+            <button onClick={exportCSV} style={{ order: 2 }}>Export to CSV</button>
           </div>
           {average && (
             <div>
