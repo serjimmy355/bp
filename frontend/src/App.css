@@ -1,19 +1,28 @@
 /* Clean, modern, error-free stylesheet for your app */
-:root {
-  --bg: #0b1220;
-  --panel: #131a28;
-  --border: #253047;
-  --muted: #a9b0c2;
-  --text: #e6e8ec;
-  --input: #0e1420;
-  --input-border: #33405e;
-  --input-focus: #4b86ff;
-  --accent: #2f6fce;
-  --accent-hover: #2a60b0;
-  --danger: #ff6b6b;
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.7em 1.2em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, transform .02s;
+  margin-top: 8px;
 }
 
-*,
+button.delete {
+  background: var(--danger);
+}
+
+button.delete:hover {
+  background: #d32f2f;
+}
+
+button:hover {
+  background: var(--accent-hover);
+}
 *::before,
 *::after { box-sizing: border-box; }
 

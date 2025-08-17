@@ -297,7 +297,7 @@ function App() {
                 ))}
               </tbody>
             </table>
-            {message && <div className={`err${message.toLowerCase().includes('success') ? ' success' : ''}`}>{message}</div>}
+            {/* Message will only be rendered once below */}
           </div>
         </>
       )}
