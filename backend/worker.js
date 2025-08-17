@@ -127,19 +127,46 @@ export default {
       return new Response(JSON.stringify({ message: 'Measurement deleted' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
       // Calculate average blood pressure
-  if (request.method === 'GET' && pathname === '/average') {
+      if (request.method === 'GET' && pathname === '/average') {
         const username = url.searchParams.get('username');
         if (!username) {
-            return new Response('Missing username', { status: 400, headers: corsHeaders });
+          return new Response('Missing username', { status: 400, headers: corsHeaders });
         }
         const user = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
         if (!user) {
-            return new Response('User not found', { status: 404, headers: corsHeaders });
+          return new Response('User not found', { status: 404, headers: corsHeaders });
         }
         const result = await DB.prepare('SELECT AVG(systolic) AS avg_systolic, AVG(diastolic) AS avg_diastolic FROM measurements WHERE user_id = ?')
           .bind(user.id).first();
-          return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
-  return new Response(JSON.stringify({ message: 'Not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-  }
-};
+
+      // Export measurements as CSV
+      if (request.method === 'GET' && pathname === '/export') {
+        const username = url.searchParams.get('username');
+        if (!username) {
+          return new Response('Missing username', { status: 400, headers: corsHeaders });
+        }
+        const user = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
+        if (!user) {
+          return new Response('User not found', { status: 404, headers: corsHeaders });
+        }
+        const measurements = await DB.prepare('SELECT systolic, diastolic, heart_rate, timestamp FROM measurements WHERE user_id = ? ORDER BY timestamp DESC').bind(user.id).all();
+        // Build CSV string
+        let csv = 'Systolic,Diastolic,Heart Rate,Timestamp\n';
+        for (const m of measurements.results) {
+          csv += `${m.systolic},${m.diastolic},${m.heart_rate},${m.timestamp}\n`;
+        }
+        return new Response(csv, {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'text/csv',
+            'Content-Disposition': 'attachment; filename="measurements.csv"'
+          }
+        });
+      }
+
+      return new Response(JSON.stringify({ message: 'Not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+  };
