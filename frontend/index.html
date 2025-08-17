@@ -12,6 +12,21 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blood Pressure & Heart Rate Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  // On small screens, pretend the viewport is 480px wide and scale down to fit
+  (function () {
+    var m = document.querySelector('meta[name=viewport]');
+    if (screen.width < 480) {
+      var target = 480;
+      var scale = screen.width / target;
+      m.setAttribute('content',
+        'width=' + target + ', initial-scale=' + scale +
+        ', maximum-scale=' + scale + ', user-scalable=no');
+    }
+  })();
+</script>
+
   </head>
   <body>
     <div id="root"></div>
