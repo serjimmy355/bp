@@ -36,8 +36,22 @@ function App() {
   const [heartRate, setHeartRate] = useState('');
   const [average, setAverage] = useState(null);
   const [measurements, setMeasurements] = useState([]);
-  // ...existing code...
   const [selectedIds, setSelectedIds] = useState([]);
+
+  // Logout handler
+  const logout = () => {
+    setLoggedIn(false);
+    setUsername('');
+    setPassword('');
+    setMessage('');
+    setSystolic('');
+    setDiastolic('');
+    setHeartRate('');
+    setAverage(null);
+    setMeasurements([]);
+    setSelectedIds([]);
+    setPage('login');
+  };
   // Handle select all
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -187,8 +201,10 @@ function App() {
             <input id="register-username" name="register-username" placeholder="Username" value={regUsername} onChange={e => setRegUsername(e.target.value)} />
             <label htmlFor="register-password">Password</label>
             <input id="register-password" name="register-password" type="password" placeholder="Password" value={regPassword} onChange={e => setRegPassword(e.target.value)} />
-            <button type="submit">Register</button>
-            <button type="button" onClick={() => setPage('login')}>Back to Login</button>
+            <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
+              <button type="submit">Register</button>
+              <button type="button" onClick={() => setPage('login')}>Back to Login</button>
+            </div>
           </form>
         ) : (
           <form onSubmit={login}>
@@ -197,8 +213,10 @@ function App() {
             <input id="login-username" name="login-username" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
             <label htmlFor="login-password">Password</label>
             <input id="login-password" name="login-password" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-            <button type="submit">Login</button>
-            <button type="button" onClick={() => setPage('register')}>Register</button>
+            <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
+              <button type="submit">Login</button>
+              <button type="button" onClick={() => setPage('register')}>Register</button>
+            </div>
           </form>
         )
       ) : (
