@@ -1,6 +1,7 @@
 
 
 import { useState, useEffect } from 'react';
+import logo from '../logo.svg';
 import './App.css';
 
 const API_BASE = 'https://bp-worker.jimross355.workers.dev'; // Replace with your deployed Worker URL
@@ -138,7 +139,7 @@ function App() {
 
   return (
     <div className="container">
-  <img src={require('../logo.svg')} alt="Blood Pressure & Heart Rate Tracker" style={{ height: '64px', marginBottom: '18px' }} />
+  <img src={logo} alt="Blood Pressure & Heart Rate Tracker" style={{ height: '64px', marginBottom: '18px' }} />
       {!loggedIn ? (
         page === 'register' ? (
           <form onSubmit={register}>
