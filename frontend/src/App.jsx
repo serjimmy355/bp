@@ -138,7 +138,7 @@ function App() {
 
   return (
     <div className="container">
-      <h1>Blood Pressure & Heart Rate Tracker</h1>
+      <img src={require('../logo.svg')} alt="Logo" style={{ height: '64px', marginBottom: '18px' }} />
       {!loggedIn ? (
         page === 'register' ? (
           <form onSubmit={register}>
