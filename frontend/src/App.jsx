@@ -1,19 +1,3 @@
-  // Logout handler
-  const logout = () => {
-    setLoggedIn(false);
-    setUsername('');
-    setPassword('');
-    setMessage('');
-    setSystolic('');
-    setDiastolic('');
-    setHeartRate('');
-    setAverage(null);
-    setMeasurements([]);
-    setSelectedIds([]);
-    setPage('login');
-  };
-
-
 import { useState, useEffect } from 'react';
 import './App.css';
 import logo from './assets/logo.svg';
@@ -52,6 +36,7 @@ function App() {
     setSelectedIds([]);
     setPage('login');
   };
+
   // Handle select all
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -124,17 +109,12 @@ function App() {
     } else {
       setMessage(data.message || data.error || 'Login failed');
     }
-    
   };
 
   const submitMeasurement = async (e) => {
     e.preventDefault();
     setMessage('');
     const payload = { username, systolic, diastolic, heart_rate: heartRate };
-    console.log('Submitting measurement:', {
-      url: `${API_BASE}/measurements`,
-      payload
-    });
     const res = await fetch(`${API_BASE}/measurements`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -142,9 +122,9 @@ function App() {
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.message) {
-      setMessage(data.message); // Show success message
+      setMessage(data.message);
     } else if (data.error) {
-      setMessage(data.error); // Show error message
+      setMessage(data.error);
     } else {
       setMessage('An unexpected error occurred.');
     }
@@ -153,7 +133,6 @@ function App() {
 
   const fetchMeasurements = async (usernameParam) => {
     const url = `${API_BASE}/measurements?username=${encodeURIComponent(usernameParam)}`;
-    console.log('Fetching measurements:', { url, usernameParam });
     const res = await fetch(url);
     if (res.ok) {
       setMeasurements(await res.json());
@@ -207,15 +186,22 @@ function App() {
 
   return (
     <div className="container">
-  <img src={logo} alt="Blood Pressure & Heart Rate Tracker" style={{ height: '64px', marginBottom: '18px' }} />
+      {/* Centered logo + optional logout (no floats) */}
+      <div className="topbar">
+        <img src={logo} alt="Blood Pressure & Heart Rate Tracker" />
+        {loggedIn && <button onClick={logout}>Logout</button>}
+      </div>
+
       {!loggedIn ? (
         page === 'register' ? (
           <form onSubmit={register}>
             <h2>Register</h2>
             <label htmlFor="register-username">Username</label>
-            <input id="register-username" name="register-username" placeholder="Username" value={regUsername} onChange={e => setRegUsername(e.target.value)} />
+            <input id="register-username" name="register-username" placeholder="Username"
+                   value={regUsername} onChange={e => setRegUsername(e.target.value)} />
             <label htmlFor="register-password">Password</label>
-            <input id="register-password" name="register-password" type="password" placeholder="Password" value={regPassword} onChange={e => setRegPassword(e.target.value)} />
+            <input id="register-password" name="register-password" type="password" placeholder="Password"
+                   value={regPassword} onChange={e => setRegPassword(e.target.value)} />
             <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
               <button type="submit">Register</button>
               <button type="button" onClick={() => setPage('login')}>Back to Login</button>
@@ -225,9 +211,11 @@ function App() {
           <form onSubmit={login}>
             <h2>Login</h2>
             <label htmlFor="login-username">Username</label>
-            <input id="login-username" name="login-username" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
+            <input id="login-username" name="login-username" placeholder="Username"
+                   value={username} onChange={e => setUsername(e.target.value)} />
             <label htmlFor="login-password">Password</label>
-            <input id="login-password" name="login-password" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+            <input id="login-password" name="login-password" type="password" placeholder="Password"
+                   value={password} onChange={e => setPassword(e.target.value)} />
             <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
               <button type="submit">Login</button>
               <button type="button" onClick={() => setPage('register')}>Register</button>
@@ -236,25 +224,28 @@ function App() {
         )
       ) : (
         <>
-          <button onClick={logout} style={{ float: 'right', marginBottom: '12px' }}>Logout</button>
           <form onSubmit={submitMeasurement}>
             <h2>Enter Measurement</h2>
             <div className="measurement-row">
               <div className="input-group">
                 <label htmlFor="systolic">Systolic</label>
-                <input id="systolic" name="systolic" placeholder="Systolic" value={systolic} onChange={e => setSystolic(e.target.value)} />
+                <input id="systolic" name="systolic" placeholder="Systolic"
+                       value={systolic} onChange={e => setSystolic(e.target.value)} />
               </div>
               <div className="input-group">
                 <label htmlFor="diastolic">Diastolic</label>
-                <input id="diastolic" name="diastolic" placeholder="Diastolic" value={diastolic} onChange={e => setDiastolic(e.target.value)} />
+                <input id="diastolic" name="diastolic" placeholder="Diastolic"
+                       value={diastolic} onChange={e => setDiastolic(e.target.value)} />
               </div>
               <div className="input-group">
                 <label htmlFor="heart-rate">Heart Rate</label>
-                <input id="heart-rate" name="heart-rate" placeholder="Heart Rate" value={heartRate} onChange={e => setHeartRate(e.target.value)} />
+                <input id="heart-rate" name="heart-rate" placeholder="Heart Rate"
+                       value={heartRate} onChange={e => setHeartRate(e.target.value)} />
               </div>
             </div>
             <button type="submit">Submit</button>
           </form>
+
           {average && (
             <div>
               <h3>Average Blood Pressure</h3>
@@ -262,12 +253,15 @@ function App() {
               <p>Diastolic: {average.avg_diastolic?.toFixed(2)}</p>
             </div>
           )}
+
           <div className="message-container">
             <h2>Measurements</h2>
-            {/* CSV button will be moved below the table */}
             {selectedIds.length > 0 && (
-              <button onClick={deleteSelected} style={{ marginLeft: '12px', background: 'var(--danger)' }}>Delete Selected</button>
+              <button className="delete" onClick={deleteSelected} style={{ marginLeft: '12px' }}>
+                Delete Selected
+              </button>
             )}
+
             <table>
               <thead>
                 <tr>
@@ -304,15 +298,21 @@ function App() {
                 ))}
               </tbody>
             </table>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginTop: '18px' }}>
-              <button onClick={getAverage} style={{ whiteSpace: 'nowrap', width: '70%' }}>Get Average</button>
-              <button onClick={exportCSV} style={{ whiteSpace: 'nowrap', width: '70%' }}>CSV ⬇</button>
+
+            {/* Even-flex, capped width action buttons */}
+            <div className="action-row">
+              <button onClick={getAverage}>Get Average</button>
+              <button onClick={exportCSV}>CSV ⬇</button>
             </div>
-            {/* Message will only be rendered once below */}
           </div>
         </>
       )}
-  {message && <div className={`err${message.toLowerCase().includes('success') ? ' success' : ''}`}>{message}</div>}
+
+      {message && (
+        <div className={`err${message.toLowerCase().includes('success') ? ' success' : ''}`}>
+          {message}
+        </div>
+      )}
     </div>
   );
 }

@@ -24,17 +24,10 @@ button {
   margin-top: 8px;
 }
 
-button.delete {
-  background: var(--danger);
-}
+button.delete { background: var(--danger); }
+button.delete:hover { background: #d32f2f; }
+button:hover { background: var(--accent-hover); }
 
-button.delete:hover {
-  background: #d32f2f;
-}
-
-button:hover {
-  background: var(--accent-hover);
-}
 *::before,
 *::after { box-sizing: border-box; }
 
@@ -60,6 +53,26 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/* Top bar with centered logo, optional logout pinned right */
+.topbar {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.topbar img {
+  height: 64px;
+  display: block;
+  margin: 0 auto; /* keep the logo visually centered */
+}
+.topbar button {
+  position: absolute;
+  right: 0;               /* logout pinned right without affecting centering */
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* Forms */
@@ -97,9 +110,7 @@ form {
     gap: 10px;
     align-items: stretch;
   }
-  .input-group {
-    min-width: 0;
-  }
+  .input-group { min-width: 0; }
 }
 
 input, select, textarea {
@@ -123,7 +134,7 @@ input:focus-visible,
 select:focus,
 textarea:focus {
   border-color: var(--input-focus);
-  box-shadow: 0 0 0 3px rgba(75,134,255,.25);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.25);
 }
 
 /* Buttons */
@@ -140,17 +151,31 @@ button {
   transition: background .15s, transform .02s, opacity .15s;
   margin-top: 8px;
 }
-
 .button-row {
   display: flex;
   gap: 16px;
   margin-top: 12px;
   justify-content: center;
 }
-
-button:hover { background: var(--accent-hover); }
 button:active { transform: translateY(1px); }
 button:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Even-flex action row under the table */
+.action-row {
+  width: 100%;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+}
+.action-row button {
+  flex: 1;            /* equal widths */
+  min-width: 140px;   /* don’t shrink too far */
+  max-width: 70%;     /* never wider than the submit button cap */
+  font-size: 1.08rem;
+  padding: 0.7em 1.2em;
+}
 
 /* Headings */
 h1, h2, h3 {
@@ -200,11 +225,7 @@ tbody tr:hover { background: #18213a; }
   text-align: center;
   color: var(--danger);
 }
-
-.err.success {
-  color: #2ecc40;
-  background: var(--panel);
-}
+.err.success { color: #2ecc40; background: var(--panel); }
 
 /* Vite/React boilerplate theming */
 #root {
@@ -213,22 +234,15 @@ tbody tr:hover { background: #18213a; }
   padding: 2rem;
   text-align: center;
 }
-
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
 }
-
 .logo:hover { filter: drop-shadow(0 0 2em #646cffaa); }
 .logo.react:hover { filter: drop-shadow(0 0 2em #61dafbaa); }
-
-@keyframes logo-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
+@keyframes logo-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo { animation: logo-spin infinite 20s linear; }
 }
@@ -247,6 +261,11 @@ tbody tr:hover { background: #18213a; }
     height: 42px;
     padding: 0 10px;
   }
+  .action-row { flex-direction: column; }
+  .action-row button {
+    width: 70%;        /* match submit width when stacked */
+    max-width: 70%;
+  }
   h1, h2, h3 { font-size: 1.2rem; }
 }
 
@@ -254,13 +273,13 @@ tbody tr:hover { background: #18213a; }
 .card { padding: 2em; }
 .read-the-docs { color: var(--muted); }
 
+/* Center the submit in the form */
 button[type="submit"] {
   width: 70%;
-  align-self: center;      /* center this flex item in the form */
-  /* or use margins instead: margin: 8px auto 0; */
+  align-self: center; /* center this flex item in the form */
 }
 
-/* Table action buttons */
+/* Table action buttons (compact & red) */
 table button {
   width: auto;                 /* shrink to fit text */
   padding: 0.4em 0.9em;        /* smaller padding */
@@ -268,12 +287,6 @@ table button {
   border-radius: 8px;          /* less chunky */
   margin: 0;                   /* remove top margin */
   display: inline-block;
-}
-
-table button {
   background: var(--danger);
 }
-
-table button:hover {
-  background: #e05555;         /* slightly darker red */
-}
+table button:hover { background: #e05555; }
