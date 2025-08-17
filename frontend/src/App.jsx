@@ -60,7 +60,6 @@ function App() {
   const submitMeasurement = async (e) => {
     e.preventDefault();
     setMessage('');
-    // Log the payload and URL for debugging
     const payload = { username, systolic, diastolic, heart_rate: heartRate };
     console.log('Submitting measurement:', {
       url: `${API_BASE}/measurements`,
@@ -72,7 +71,13 @@ function App() {
       body: JSON.stringify(payload)
     });
     const data = await res.json().catch(() => ({}));
-    setMessage(data.message || data.error || '');
+    if (res.ok && data.message) {
+      setMessage(data.message); // Show success message
+    } else if (data.error) {
+      setMessage(data.error); // Show error message
+    } else {
+      setMessage('An unexpected error occurred.');
+    }
     fetchMeasurements(username);
   };
 
