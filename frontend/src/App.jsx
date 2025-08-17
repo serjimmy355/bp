@@ -145,16 +145,20 @@ function App() {
             <h2>Register</h2>
             <input placeholder="Username" value={regUsername} onChange={e => setRegUsername(e.target.value)} />
             <input type="password" placeholder="Password" value={regPassword} onChange={e => setRegPassword(e.target.value)} />
-            <button type="submit">Register</button>
-            <button type="button" onClick={() => setPage('login')}>Back to Login</button>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+              <button type="submit">Register</button>
+              <button type="button" onClick={() => setPage('login')}>Back to Login</button>
+            </div>
           </form>
         ) : (
           <form onSubmit={login}>
             <h2>Login</h2>
             <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
             <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-            <button type="submit">Login</button>
-            <button type="button" onClick={() => setPage('register')}>Register</button>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+              <button type="submit">Login</button>
+              <button type="button" onClick={() => setPage('register')}>Register</button>
+            </div>
           </form>
         )
       ) : (
