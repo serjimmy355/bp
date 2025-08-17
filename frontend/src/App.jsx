@@ -138,27 +138,23 @@ function App() {
 
   return (
     <div className="container">
-      <img src={require('../logo.svg')} alt="Logo" style={{ height: '64px', marginBottom: '18px' }} />
+      <h1>Blood Pressure & Heart Rate Tracker</h1>
       {!loggedIn ? (
         page === 'register' ? (
           <form onSubmit={register}>
             <h2>Register</h2>
             <input placeholder="Username" value={regUsername} onChange={e => setRegUsername(e.target.value)} />
             <input type="password" placeholder="Password" value={regPassword} onChange={e => setRegPassword(e.target.value)} />
-            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-              <button type="submit">Register</button>
-              <button type="button" onClick={() => setPage('login')}>Back to Login</button>
-            </div>
+            <button type="submit">Register</button>
+            <button type="button" onClick={() => setPage('login')}>Back to Login</button>
           </form>
         ) : (
           <form onSubmit={login}>
             <h2>Login</h2>
             <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
             <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-              <button type="submit">Login</button>
-              <button type="button" onClick={() => setPage('register')}>Register</button>
-            </div>
+            <button type="submit">Login</button>
+            <button type="button" onClick={() => setPage('register')}>Register</button>
           </form>
         )
       ) : (
