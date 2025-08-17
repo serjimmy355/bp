@@ -26,18 +26,62 @@ body {
 }
 
 
+
 .container {
   background: linear-gradient(180deg, #161e2e 0%, var(--panel) 100%);
   border: 1px solid var(--border);
   border-radius: 20px;
   box-shadow: 0 16px 48px rgba(0,0,0,.45);
-  padding: 32px 28px 28px;
-  max-width: 700px;
-  margin: 32px auto;
-  min-height: 400px;
+  padding: 40px 32px 36px;
+  max-width: 420px;
+  margin: 48px auto;
+  min-height: 540px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
+}
+
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+button {
+  margin-top: 10px;
+  margin-bottom: 0;
+  width: 100%;
+  font-size: 1.08rem;
+}
+
+.button-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .container {
+    max-width: 98vw;
+    padding: 18px 6vw 18px;
+    min-height: 380px;
+    border-radius: 12px;
+  }
+  form {
+    gap: 10px;
+  }
+  button {
+    font-size: 1rem;
+    height: 42px;
+    padding: 0 10px;
+  }
+  h1, h2, h3 {
+    font-size: 1.2rem;
+  }
 }
 
 @media (max-width: 600px) {
