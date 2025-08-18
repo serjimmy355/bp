@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { DateTime } from 'luxon';
 import './App.css';
 import logo from './assets/logo.svg';
 
@@ -114,7 +115,15 @@ function App() {
   const submitMeasurement = async (e) => {
     e.preventDefault();
     setMessage('');
-    const payload = { username, systolic, diastolic, heart_rate: heartRate };
+    // Use device local time string for timestamp
+    const localTime = new Date().toLocaleString();
+    const payload = {
+      username,
+      systolic,
+      diastolic,
+      heart_rate: heartRate,
+      timestamp: localTime
+    };
     const res = await fetch(`${API_BASE}/measurements`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -283,14 +292,6 @@ function App() {
             <button type="submit">Submit</button>
           </form>
 
-          {average && (
-            <div>
-              <h3>Average Blood Pressure</h3>
-              <p>Systolic: {average.avg_systolic?.toFixed(2)}</p>
-              <p>Diastolic: {average.avg_diastolic?.toFixed(2)}</p>
-            </div>
-          )}
-
           <div className="message-container">
             <h2>Measurements</h2>
 
@@ -312,7 +313,8 @@ function App() {
                         onChange={handleSelectAll}
                       />
                     </th>
-                    <th>Timestamp</th>
+                    <th>Date</th>
+                    <th>Time</th>
                     <th>Systolic</th>
                     <th>Diastolic</th>
                     <th>Heart Rate</th>
@@ -330,7 +332,8 @@ function App() {
                           onChange={e => handleSelectOne(m.id, e)}
                         />
                       </td>
-                      <td>{new Date(m.timestamp).toLocaleString()}</td>
+                      <td>{m.timestamp?.split(',')[0]}</td>
+                      <td>{m.timestamp?.split(',')[1]?.trim()}</td>
                       <td>{m.systolic}</td>
                       <td>{m.diastolic}</td>
                       <td>{m.heart_rate}</td>
@@ -344,6 +347,16 @@ function App() {
                 </tbody>
               </table>
             </div>
+
+            {/* Average readings below table, above buttons */}
+            {average && (
+              <div style={{ margin: '24px 0 8px 0' }}>
+                <h3>Average Readings</h3>
+                <p>Systolic: {average.avg_systolic?.toFixed(2)}</p>
+                <p>Diastolic: {average.avg_diastolic?.toFixed(2)}</p>
+                <p>Heart Rate: {average.avg_heart_rate != null ? average.avg_heart_rate.toFixed(2) : 'N/A'}</p>
+              </div>
+            )}
 
             {/* Even-flex, capped width action buttons */}
             <div className="action-row">
