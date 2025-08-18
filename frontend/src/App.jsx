@@ -327,15 +327,17 @@ function App() {
                     let date = '';
                     let time = '';
                     if (m.timestamp) {
-                      if (m.timestamp.includes(',')) {
-                        const [datePart, timePart] = m.timestamp.split(',');
-                        date = datePart ? datePart.trim() : '';
-                        time = timePart ? timePart.trim() : '';
+                      // Handles 'YYYY-MM-DD, HH:MM:SS', 'YYYY-MM-DD HH:MM:SS', 'DD/MM/YYYY, HH:MM:SS', 'DD/MM/YYYY HH:MM:SS'
+                      const commaSplit = m.timestamp.split(',');
+                      if (commaSplit.length === 2) {
+                        date = commaSplit[0].trim();
+                        time = commaSplit[1].trim();
                       } else {
-                        const match = m.timestamp.match(/^(\d{2}\/\d{2}\/\d{4})\s+(\d{2}:\d{2}:\d{2})$/);
-                        if (match) {
-                          date = match[1];
-                          time = match[2];
+                        // Try to split by first space after date
+                        const spaceSplit = m.timestamp.split(' ');
+                        if (spaceSplit.length === 2) {
+                          date = spaceSplit[0].trim();
+                          time = spaceSplit[1].trim();
                         } else {
                           date = m.timestamp.trim();
                           time = '';
