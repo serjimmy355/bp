@@ -151,7 +151,7 @@ export default {
       if (!user) {
         return new Response('User not found', { status: 404, headers: corsHeaders });
       }
-      const result = await DB.prepare('SELECT AVG(systolic) AS avg_systolic, AVG(diastolic) AS avg_diastolic FROM measurements WHERE user_id = ?')
+      const result = await DB.prepare('SELECT AVG(systolic) AS avg_systolic, AVG(diastolic) AS avg_diastolic, AVG(heart_rate) AS avg_heart_rate FROM measurements WHERE user_id = ?')
         .bind(user.id).first();
       return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
@@ -174,10 +174,22 @@ export default {
         let date = '';
         let time = '';
         if (m.timestamp) {
-          // Split local timestamp string: "DD/MM/YYYY, HH:MM:SS"
-          const [datePart, timePart] = m.timestamp.split(',');
-          date = datePart ? datePart.trim() : '';
-          time = timePart ? timePart.trim() : '';
+          // Accept both "DD/MM/YYYY, HH:MM:SS" and "DD/MM/YYYY HH:MM:SS" formats
+          if (m.timestamp.includes(',')) {
+            const [datePart, timePart] = m.timestamp.split(',');
+            date = datePart ? datePart.trim() : '';
+            time = timePart ? timePart.trim() : '';
+          } else {
+            // Try to split by first space after date
+            const match = m.timestamp.match(/^(\d{2}\/\d{2}\/\d{4})\s+(\d{2}:\d{2}:\d{2})$/);
+            if (match) {
+              date = match[1];
+              time = match[2];
+            } else {
+              date = m.timestamp.trim();
+              time = '';
+            }
+          }
         }
         csv += `${m.systolic}, ${m.diastolic}, ${m.heart_rate},${date}, ${time}\n`;
       }

@@ -323,27 +323,47 @@ function App() {
                 </thead>
 
                 <tbody>
-                  {measurements.map(m => (
-                    <tr key={m.id}>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.includes(m.id)}
-                          onChange={e => handleSelectOne(m.id, e)}
-                        />
-                      </td>
-                      <td>{m.timestamp?.split(',')[0]}</td>
-                      <td>{m.timestamp?.split(',')[1]?.trim()}</td>
-                      <td>{m.systolic}</td>
-                      <td>{m.diastolic}</td>
-                      <td>{m.heart_rate}</td>
-                      <td>
-                        <button className="delete" onClick={() => deleteMeasurement(m.id)}>
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {measurements.map(m => {
+                    let date = '';
+                    let time = '';
+                    if (m.timestamp) {
+                      if (m.timestamp.includes(',')) {
+                        const [datePart, timePart] = m.timestamp.split(',');
+                        date = datePart ? datePart.trim() : '';
+                        time = timePart ? timePart.trim() : '';
+                      } else {
+                        const match = m.timestamp.match(/^(\d{2}\/\d{2}\/\d{4})\s+(\d{2}:\d{2}:\d{2})$/);
+                        if (match) {
+                          date = match[1];
+                          time = match[2];
+                        } else {
+                          date = m.timestamp.trim();
+                          time = '';
+                        }
+                      }
+                    }
+                    return (
+                      <tr key={m.id}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(m.id)}
+                            onChange={e => handleSelectOne(m.id, e)}
+                          />
+                        </td>
+                        <td>{date}</td>
+                        <td>{time}</td>
+                        <td>{m.systolic}</td>
+                        <td>{m.diastolic}</td>
+                        <td>{m.heart_rate}</td>
+                        <td>
+                          <button className="delete" onClick={() => deleteMeasurement(m.id)}>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
