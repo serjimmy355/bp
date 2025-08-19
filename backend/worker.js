@@ -137,7 +137,7 @@ export default {
       if (result.changes === 0) {
         return new Response(JSON.stringify({ error: 'Measurement not found or not deleted' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
-      return new Response(JSON.stringify({ message: 'Measurement deleted' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ message: 'Measurements deleted' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // Calculate average blood pressure

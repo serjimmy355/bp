@@ -71,6 +71,7 @@ function App() {
 
   // Bulk delete
   const deleteSelected = async () => {
+    if (!window.confirm('Are you sure you want to delete the selected records?')) return;
     for (const id of selectedIds) {
       await deleteMeasurement(id);
     }
@@ -160,6 +161,11 @@ function App() {
     const data = await res.json().catch(() => ({}));
     setMessage(data.message || data.error || '');
     fetchMeasurements(username);
+  // Individual delete with confirmation
+  const handleDeleteMeasurement = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this record?')) return;
+    await deleteMeasurement(id);
+  };
   };
 
   const exportCSV = async () => {
@@ -308,6 +314,13 @@ function App() {
           <div className="message-container">
             <h2>Measurements</h2>
 
+            {/* Message above table, only for errors or delete confirmation, not for 'Measurement stored' */}
+            {message && message !== 'Measurement stored' && (
+              <div className={`err${message.toLowerCase().includes('success') ? ' success' : ''}`} style={{ color: 'red', marginBottom: '12px', textAlign: 'center' }}>
+                {message}
+              </div>
+            )}
+
             {selectedIds.length > 0 && (
               <button className="delete" onClick={deleteSelected} style={{ marginLeft: '12px' }}>
                 Delete Selected
@@ -372,7 +385,10 @@ function App() {
                         <td>{m.diastolic}</td>
                         <td>{m.heart_rate}</td>
                         <td>
-                          <button className="delete" onClick={() => deleteMeasurement(m.id)}>
+                          <button className="delete" onClick={async () => {
+                            if (!window.confirm('Are you sure you want to delete this record?')) return;
+                            await deleteMeasurement(m.id);
+                          }}>
                             Delete
                           </button>
                         </td>
@@ -400,12 +416,6 @@ function App() {
             </div>
           </div>
         </>
-      )}
-
-      {message && (
-        <div className={`err${message.toLowerCase().includes('success') ? ' success' : ''}`}>
-          {message}
-        </div>
       )}
     </div>
   );
