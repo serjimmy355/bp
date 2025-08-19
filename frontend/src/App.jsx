@@ -11,10 +11,11 @@ function App() {
   // Register form state
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
+  const [regAgreed, setRegAgreed] = useState(false);
   // Login form state
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(() => localStorage.getItem('bp_username') || '');
   const [password, setPassword] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem('bp_username'));
   const [message, setMessage] = useState('');
   const [systolic, setSystolic] = useState('');
   const [diastolic, setDiastolic] = useState('');
@@ -22,6 +23,16 @@ function App() {
   const [average, setAverage] = useState(null);
   const [measurements, setMeasurements] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
+  // Cookie consent state
+  const [cookieConsent, setCookieConsent] = useState(() => {
+    const consent = localStorage.getItem('cookieConsent');
+    return consent === 'all' || consent === 'essential';
+  });
+  // Handle cookie consent
+  const handleCookieConsent = (type) => {
+    localStorage.setItem('cookieConsent', type);
+    setCookieConsent(true);
+  };
 
   // Logout handler
   const logout = () => {
@@ -36,6 +47,8 @@ function App() {
     setMeasurements([]);
     setSelectedIds([]);
     setPage('login');
+    localStorage.removeItem('bp_username');
+    localStorage.removeItem('bp_last_activity');
   };
 
   // Handle select all
@@ -81,6 +94,10 @@ function App() {
   const register = async (e) => {
     e.preventDefault();
     setMessage('');
+    if (!regAgreed) {
+      setMessage('You must confirm you have read and agree to the Privacy Policy and Terms of Service.');
+      return;
+    }
     const res = await fetch(`${API_BASE}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -92,6 +109,7 @@ function App() {
       setPage('login');
       setRegUsername('');
       setRegPassword('');
+      setRegAgreed(false);
     }
   };
 
@@ -107,6 +125,8 @@ function App() {
     if (res.ok) {
       setLoggedIn(true);
       setMessage(data.message || 'Logged in!');
+      localStorage.setItem('bp_username', username);
+      localStorage.setItem('bp_last_activity', Date.now().toString());
       fetchMeasurements(username);
     } else {
       setMessage(data.message || data.error || 'Login failed');
@@ -193,6 +213,35 @@ function App() {
     }
   };
 
+  // Inactivity timeout (10 minutes)
+  const INACTIVITY_LIMIT = 60 * 10 * 1000; // 10 minutes in ms
+  const updateActivity = () => {
+    if (loggedIn) {
+      localStorage.setItem('bp_last_activity', Date.now().toString());
+    }
+  };
+  useEffect(() => {
+    if (loggedIn) {
+      updateActivity();
+      const checkInactivity = () => {
+        const last = parseInt(localStorage.getItem('bp_last_activity') || '0', 10);
+        if (Date.now() - last > INACTIVITY_LIMIT) {
+          logout();
+        }
+      };
+      const interval = setInterval(checkInactivity, 60 * 1000); // check every minute
+      window.addEventListener('mousemove', updateActivity);
+      window.addEventListener('keydown', updateActivity);
+      window.addEventListener('click', updateActivity);
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('mousemove', updateActivity);
+        window.removeEventListener('keydown', updateActivity);
+        window.removeEventListener('click', updateActivity);
+      };
+    }
+  }, [loggedIn]);
+
   useEffect(() => {
     if (loggedIn && username) {
       fetchMeasurements(username);
@@ -200,7 +249,38 @@ function App() {
   }, [loggedIn, username]);
 
   return (
-    <div className="container">
+  <div className="container" style={{ position: 'relative', minHeight: '100vh' }}>
+      {/* Cookie Consent Popup */}
+      {!cookieConsent && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: '#232a3a',
+          color: '#eaf1fb',
+          padding: '18px 16px',
+          textAlign: 'center',
+          zIndex: 9999,
+          boxShadow: '0 -2px 8px rgba(0,0,0,0.12)',
+          fontSize: '1rem'
+        }}>
+          This website uses cookies to enhance your experience. Optional cookies help us improve the site. See our
+          <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Privacy Policy</a>.
+          <button
+            onClick={() => handleCookieConsent('all')}
+            style={{ marginLeft: '18px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Accept All
+          </button>
+          <button
+            onClick={() => handleCookieConsent('essential')}
+            style={{ marginLeft: '12px', background: '#64748b', color: '#fff', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Decline Optional
+          </button>
+        </div>
+      )}
       {/* Centered logo + optional logout (no floats) */}
       <div className="topbar">
         <img className="app-logo" src={logo} alt="Blood Pressure & Heart Rate Tracker" />
@@ -208,57 +288,78 @@ function App() {
       </div>
 
       {!loggedIn ? (
-        page === 'register' ? (
-          <form onSubmit={register}>
-            <h2>Register</h2>
-            <label htmlFor="register-username">Username</label>
-            <input
-              id="register-username"
-              name="register-username"
-              placeholder="Username"
-              value={regUsername}
-              onChange={e => setRegUsername(e.target.value)}
-            />
-            <label htmlFor="register-password">Password</label>
-            <input
-              id="register-password"
-              name="register-password"
-              type="password"
-              placeholder="Password"
-              value={regPassword}
-              onChange={e => setRegPassword(e.target.value)}
-            />
-            <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
-              <button type="submit">Register</button>
-              <button type="button" onClick={() => setPage('login')}>Back to Login</button>
-            </div>
-          </form>
-        ) : (
-          <form onSubmit={login}>
-            <h2>Login</h2>
-            <label htmlFor="login-username">Username</label>
-            <input
-              id="login-username"
-              name="login-username"
-              placeholder="Username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-            />
-            <label htmlFor="login-password">Password</label>
-            <input
-              id="login-password"
-              name="login-password"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-            <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
-              <button type="submit">Login</button>
-              <button type="button" onClick={() => setPage('register')}>Register</button>
-            </div>
-          </form>
-        )
+        <>
+          {page === 'register' ? (
+            <form onSubmit={register}>
+              <h2>Register</h2>
+              <label htmlFor="register-username">Username</label>
+              <input
+                id="register-username"
+                name="register-username"
+                placeholder="Username"
+                value={regUsername}
+                onChange={e => setRegUsername(e.target.value)}
+              />
+              <label htmlFor="register-password">Password</label>
+              <input
+                id="register-password"
+                name="register-password"
+                type="password"
+                placeholder="Password"
+                value={regPassword}
+                onChange={e => setRegPassword(e.target.value)}
+              />
+              <div style={{ margin: '12px 0' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.98rem' }}>
+                  <input
+                    type="checkbox"
+                    checked={regAgreed}
+                    onChange={e => setRegAgreed(e.target.checked)}
+                    required
+                  />
+                  I confirm I have read and agree to the
+                  <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Privacy Policy</a>
+                  and
+                  <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Terms of Service</a>
+                </label>
+              </div>
+              <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
+                <button type="submit">Register</button>
+                <button type="button" onClick={() => setPage('login')}>Back to Login</button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={login}>
+              <h2>Login</h2>
+              <label htmlFor="login-username">Username</label>
+              <input
+                id="login-username"
+                name="login-username"
+                placeholder="Username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+              />
+              <label htmlFor="login-password">Password</label>
+              <input
+                id="login-password"
+                name="login-password"
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+              <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
+                <button type="submit">Login</button>
+                <button type="button" onClick={() => setPage('register')}>Register</button>
+              </div>
+            </form>
+          )}
+          <footer style={{background: '#161e2e', color: '#eaf1fb', textAlign: 'center', padding: '24px 0', marginTop: '48px', fontSize: '1rem', borderTop: '1px solid #232a3a', position: 'absolute', left: 0, right: 0, bottom: 0}}>
+            <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Privacy Policy</a>
+            |
+            <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Terms of Service</a>
+          </footer>
+        </>
       ) : (
         <>
           <form onSubmit={submitMeasurement}>
@@ -314,9 +415,26 @@ function App() {
           <div className="message-container">
             <h2>Measurements</h2>
 
-            {/* Message above table, only for errors or delete confirmation, not for 'Measurement stored' */}
+            {/* Message above table, only for errors, delete confirmation, or login success */}
             {message && message !== 'Measurement stored' && (
-              <div className={`err${message.toLowerCase().includes('success') ? ' success' : ''}`} style={{ color: 'red', marginBottom: '12px', textAlign: 'center' }}>
+              <div
+                style={{
+                  color:
+                    message === 'Logged in!' || message.toLowerCase().includes('login successful')
+                      ? 'green'
+                      : 'red',
+                  marginBottom: '12px',
+                  textAlign: 'center',
+                  fontWeight:
+                    message === 'Logged in!' || message.toLowerCase().includes('login successful')
+                      ? 'bold'
+                      : 'normal',
+                  boxShadow: 'none',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0
+                }}
+              >
                 {message}
               </div>
             )}
