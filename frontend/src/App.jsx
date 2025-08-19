@@ -263,6 +263,8 @@ function App() {
                 <input
                   id="systolic"
                   name="systolic"
+                  type="number"
+                  inputMode="numeric"
                   placeholder="Systolic"
                   value={systolic}
                   onChange={e => setSystolic(e.target.value)}
@@ -273,6 +275,8 @@ function App() {
                 <input
                   id="diastolic"
                   name="diastolic"
+                  type="number"
+                  inputMode="numeric"
                   placeholder="Diastolic"
                   value={diastolic}
                   onChange={e => setDiastolic(e.target.value)}
@@ -283,6 +287,8 @@ function App() {
                 <input
                   id="heart-rate"
                   name="heart-rate"
+                  type="number"
+                  inputMode="numeric"
                   placeholder="Heart Rate"
                   value={heartRate}
                   onChange={e => setHeartRate(e.target.value)}
@@ -291,6 +297,13 @@ function App() {
             </div>
             <button type="submit">Submit</button>
           </form>
+
+          {/* Success message below submit button */}
+          {message === 'Measurement stored' && (
+            <div style={{ color: 'green', margin: '12px 0', textAlign: 'center', fontWeight: 'bold' }}>
+              Measurement stored
+            </div>
+          )}
 
           <div className="message-container">
             <h2>Measurements</h2>
