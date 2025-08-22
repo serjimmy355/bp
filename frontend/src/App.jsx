@@ -266,7 +266,7 @@ function App() {
           fontSize: '1rem'
         }}>
           This website uses cookies to enhance your experience. Optional cookies help us improve the site. See our
-          <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Privacy Policy</a>.
+          <a href="/privacypolicy.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Privacy Policy</a>.
           <button
             onClick={() => handleCookieConsent('all')}
             style={{ marginLeft: '18px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', fontWeight: 'bold' }}
@@ -318,9 +318,9 @@ function App() {
                     required
                   />
                   I confirm I have read and agree to the
-                  <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Privacy Policy</a>
+                  <a href="/privacypolicy.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Privacy Policy</a>
                   and
-                  <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Terms of Service</a>
+                  <a href="/termsofservice.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Terms of Service</a>
                 </label>
               </div>
               <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
@@ -355,9 +355,9 @@ function App() {
             </form>
           )}
           <footer style={{background: '#161e2e', color: '#eaf1fb', textAlign: 'center', padding: '24px 0', marginTop: '48px', fontSize: '1rem', borderTop: '1px solid #232a3a', position: 'absolute', left: 0, right: 0, bottom: 0}}>
-            <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Privacy Policy</a>
+            <a href="/privacypolicy.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Privacy Policy</a>
             |
-            <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Terms of Service</a>
+            <a href="/termsofservice.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Terms of Service</a>
           </footer>
         </>
       ) : (
