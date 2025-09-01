@@ -103,8 +103,19 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: regUsername, password: regPassword })
     });
-    const data = await res.json().catch(() => ({}));
-    setMessage(data.message || data.error || '');
+    let msg = '';
+    try {
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await res.json();
+        msg = data.message || data.error || '';
+      } else {
+        msg = await res.text();
+      }
+    } catch {
+      msg = '';
+    }
+    setMessage(msg);
     if (res.ok) {
       setPage('login');
       setRegUsername('');
@@ -116,24 +127,50 @@ function App() {
   const login = async (e) => {
     e.preventDefault();
     setMessage('');
+    // Validation for blank username/password removed
     const res = await fetch(`${API_BASE}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     });
-    const data = await res.json().catch(() => ({}));
+    let msg = '';
+    try {
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await res.json();
+        msg = data.message || data.error || '';
+      } else {
+        msg = await res.text();
+      }
+    } catch {
+      msg = 'Login failed';
+    }
     if (res.ok) {
       setLoggedIn(true);
-      setMessage(data.message || 'Logged in!');
+      setMessage(msg || 'Logged in!');
       localStorage.setItem('bp_username', username);
       localStorage.setItem('bp_last_activity', Date.now().toString());
       fetchMeasurements(username);
     } else {
-      setMessage(data.message || data.error || 'Login failed');
+      setMessage(msg || 'Login failed');
     }
   };
 
   const submitMeasurement = async (e) => {
+                {/* Login message under form */}
+                {message && (
+                  <div style={{
+                    color: '#fff',
+                    marginBottom: '12px',
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    background: 'none',
+                    border: 'none',
+                    boxShadow: 'none',
+                  }}>
+                    {message}
+                  </div>
+                )}
     e.preventDefault();
     setMessage('');
     // Use device local time string for timestamp
@@ -153,6 +190,10 @@ function App() {
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.message) {
       setMessage(data.message);
+  // Clear form fields after successful submission
+  setSystolic('');
+  setDiastolic('');
+  setHeartRate('');
     } else if (data.error) {
       setMessage(data.error);
     } else {
@@ -250,7 +291,7 @@ function App() {
 
   return (
   <div className="container" style={{ position: 'relative', minHeight: '100vh' }}>
-      {/* Cookie Consent Popup */}
+      {/* Cookie Consent Banner */}
       {!cookieConsent && (
         <div style={{
           position: 'fixed',
@@ -263,21 +304,15 @@ function App() {
           textAlign: 'center',
           zIndex: 9999,
           boxShadow: '0 -2px 8px rgba(0,0,0,0.12)',
-          fontSize: '1rem'
+          fontSize: '1rem',
         }}>
-          This website uses cookies to enhance your experience. Optional cookies help us improve the site. See our
-          <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Privacy Policy</a>.
+          This website uses cookies to enhance your experience. You must accept to continue. See our
+          <a href="/privacypolicy.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Privacy Policy</a>.
           <button
-            onClick={() => handleCookieConsent('all')}
+            onClick={() => { localStorage.setItem('cookieConsent', 'accepted'); setCookieConsent(true); }}
             style={{ marginLeft: '18px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', fontWeight: 'bold' }}
           >
-            Accept All
-          </button>
-          <button
-            onClick={() => handleCookieConsent('essential')}
-            style={{ marginLeft: '12px', background: '#64748b', color: '#fff', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            Decline Optional
+            Accept
           </button>
         </div>
       )}
@@ -323,34 +358,70 @@ function App() {
                   <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Terms of Service</a>
                 </label>
               </div>
+              {/* Registration message under form */}
+              {message && (
+                <div style={{
+                  color: message.toLowerCase().includes('registered') || message.toLowerCase().includes('logged in') || message.toLowerCase().includes('success') ? '#fff' : 'red',
+                  marginBottom: '12px',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  background: 'none',
+                  border: 'none',
+                  boxShadow: 'none',
+                }}>
+                  {message}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
                 <button type="submit">Register</button>
-                <button type="button" onClick={() => setPage('login')}>Back to Login</button>
+                <button type="button" onClick={() => { setPage('login'); setMessage(''); }}>Back to Login</button>
               </div>
             </form>
           ) : (
             <form onSubmit={login}>
               <h2>Login</h2>
               <label htmlFor="login-username">Username</label>
-              <input
-                id="login-username"
-                name="login-username"
-                placeholder="Username"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-              />
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  id="login-username"
+                  name="login-username"
+                  placeholder="Username"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  style={{ borderColor: username === '' && message === 'Please enter a username/password' ? 'red' : undefined, width: '100%' }}
+                />
+                {/* ...existing code for bubble... */}
+              </div>
               <label htmlFor="login-password">Password</label>
-              <input
-                id="login-password"
-                name="login-password"
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  id="login-password"
+                  name="login-password"
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  style={{ borderColor: password === '' && message === 'Please enter a username/password' ? 'red' : undefined, width: '100%' }}
+                />
+                {/* ...existing code for bubble... */}
+              </div>
+              {/* Login message under form */}
+              {message && (
+                <div style={{
+                  color: '#d70000ff',
+                  marginBottom: '12px',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  background: 'none',
+                  border: 'none',
+                  boxShadow: 'none',
+                }}>
+                  {message}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
                 <button type="submit">Login</button>
-                <button type="button" onClick={() => setPage('register')}>Register</button>
+                <button type="button" onClick={() => { setPage('register'); setMessage(''); }}>Register</button>
               </div>
             </form>
           )}
@@ -358,7 +429,11 @@ function App() {
             <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Privacy Policy</a>
             |
             <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Terms of Service</a>
+            |
+            <a href="/cookies.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Cookies Policy</a>
           </footer>
+                |
+      
         </>
       ) : (
         <>
@@ -421,7 +496,7 @@ function App() {
                 style={{
                   color:
                     message === 'Logged in!' || message.toLowerCase().includes('login successful')
-                      ? 'green'
+                      ? 'white'
                       : 'red',
                   marginBottom: '12px',
                   textAlign: 'center',
@@ -467,52 +542,100 @@ function App() {
                 </thead>
 
                 <tbody>
-                  {measurements.map(m => {
-                    let date = '';
-                    let time = '';
-                    if (m.timestamp) {
-                      // Handles 'YYYY-MM-DD, HH:MM:SS', 'YYYY-MM-DD HH:MM:SS', 'DD/MM/YYYY, HH:MM:SS', 'DD/MM/YYYY HH:MM:SS'
-                      const commaSplit = m.timestamp.split(',');
-                      if (commaSplit.length === 2) {
-                        date = commaSplit[0].trim();
-                        time = commaSplit[1].trim();
-                      } else {
-                        // Try to split by first space after date
-                        const spaceSplit = m.timestamp.split(' ');
-                        if (spaceSplit.length === 2) {
-                          date = spaceSplit[0].trim();
-                          time = spaceSplit[1].trim();
+                  {[...measurements]
+                    .sort((a, b) => {
+                      // Robust date parsing for DD/MM/YYYY and YYYY-MM-DD
+                      const parse = (ts) => {
+                        if (!ts) return 0;
+                        let datePart = '';
+                        let timePart = '';
+                        if (ts.includes(',')) {
+                          [datePart, timePart] = ts.split(',').map(s => s.trim());
+                        } else if (ts.includes(' ')) {
+                          [datePart, timePart] = ts.split(' ').map(s => s.trim());
                         } else {
-                          date = m.timestamp.trim();
-                          time = '';
+                          datePart = ts.trim();
+                        }
+                        // DD/MM/YYYY or YYYY-MM-DD
+                        let year, month, day;
+                        if (datePart.includes('/')) {
+                          // DD/MM/YYYY
+                          const parts = datePart.split('/');
+                          if (parts.length === 3) {
+                            day = parseInt(parts[0], 10);
+                            month = parseInt(parts[1], 10) - 1; // JS months are 0-based
+                            year = parseInt(parts[2], 10);
+                          }
+                        } else if (datePart.includes('-')) {
+                          // YYYY-MM-DD
+                          const parts = datePart.split('-');
+                          if (parts.length === 3) {
+                            year = parseInt(parts[0], 10);
+                            month = parseInt(parts[1], 10) - 1;
+                            day = parseInt(parts[2], 10);
+                          }
+                        }
+                        // Parse time
+                        let hour = 0, minute = 0, second = 0;
+                        if (timePart) {
+                          const tParts = timePart.split(':');
+                          if (tParts.length >= 2) {
+                            hour = parseInt(tParts[0], 10);
+                            minute = parseInt(tParts[1], 10);
+                            second = tParts[2] ? parseInt(tParts[2], 10) : 0;
+                          }
+                        }
+                        if (year && month >= 0 && day) {
+                          return new Date(year, month, day, hour, minute, second).getTime();
+                        }
+                        return 0;
+                      };
+                      return parse(b.timestamp) - parse(a.timestamp);
+                    })
+                    .map(m => {
+                      let date = '';
+                      let time = '';
+                      if (m.timestamp) {
+                        const commaSplit = m.timestamp.split(',');
+                        if (commaSplit.length === 2) {
+                          date = commaSplit[0].trim();
+                          time = commaSplit[1].trim();
+                        } else {
+                          const spaceSplit = m.timestamp.split(' ');
+                          if (spaceSplit.length === 2) {
+                            date = spaceSplit[0].trim();
+                            time = spaceSplit[1].trim();
+                          } else {
+                            date = m.timestamp.trim();
+                            time = '';
+                          }
                         }
                       }
-                    }
-                    return (
-                      <tr key={m.id}>
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.includes(m.id)}
-                            onChange={e => handleSelectOne(m.id, e)}
-                          />
-                        </td>
-                        <td>{date}</td>
-                        <td>{time}</td>
-                        <td>{m.systolic}</td>
-                        <td>{m.diastolic}</td>
-                        <td>{m.heart_rate}</td>
-                        <td>
-                          <button className="delete" onClick={async () => {
-                            if (!window.confirm('Are you sure you want to delete this record?')) return;
-                            await deleteMeasurement(m.id);
-                          }}>
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                      return (
+                        <tr key={m.id}>
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.includes(m.id)}
+                              onChange={e => handleSelectOne(m.id, e)}
+                            />
+                          </td>
+                          <td>{date}</td>
+                          <td>{time}</td>
+                          <td>{m.systolic}</td>
+                          <td>{m.diastolic}</td>
+                          <td>{m.heart_rate}</td>
+                          <td>
+                            <button className="delete" onClick={async () => {
+                              if (!window.confirm('Are you sure you want to delete this record?')) return;
+                              await deleteMeasurement(m.id);
+                            }}>
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>
