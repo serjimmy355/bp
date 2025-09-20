@@ -54,22 +54,55 @@ body {
 }
 
 /* Container (card) */
-.container {
+ .container {
   background: linear-gradient(180deg, #161e2e 0%, var(--panel) 100%);
   border: 1px solid var(--border);
   border-radius: 20px;
   box-shadow: 0 16px 48px rgba(0,0,0,.45);
-  /* Extra bottom padding so footer clears buttons */
-  padding: 40px 32px 100px;
-  width: min(720px, 100% - (var(--gutter) * 2)); /* <= key: gutters + no overhang */
-  margin-inline: auto;
-  min-height: 540px;
+  padding: 36px 32px 8px; /* reduced bottom for balanced spacing on login/register */
+  width: min(720px, 100% - (var(--gutter) * 2));
+  margin: 48px auto; /* space above/below similar to sides */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* let content flow from top */
+  justify-content: flex-start;
   position: relative;
 }
+
+/* Logged-in view needs extra bottom padding to clear footer & actions */
+/* Logged-in view: tighter vertical rhythm; rely on intrinsic spacing near action row */
+.container.logged-in {
+  padding-bottom: 8px; /* tightened further per request */
+  min-height: 540px;
+  margin-top: 32px;
+  margin-bottom: 32px; /* slightly reduced */
+}
+
+/* Footer margin (same for logged in & logged out) */
+/* Default footer gap */
+.app-footer { margin-top: 40px; }
+/* Compact variant when logged in to reduce white space */
+.container.logged-in .app-footer { margin-top: 28px; }
+
+/* Unified footer (auth + logged-in) */
+.app-footer {
+  width: 100%;
+  background: #161e2e;
+  border-top: 1px solid var(--border);
+  padding: 18px 12px;
+  display: flex;
+  align-items: center;  /* vertical center */
+  justify-content: center; /* horizontal center */
+  gap: 14px;
+  font-size: 0.75rem;
+  color: var(--text);
+  flex-wrap: wrap;
+  border-bottom-left-radius: 20px; /* match card radius when last */
+  border-bottom-right-radius: 20px;
+  box-sizing: border-box;
+}
+.app-footer a { color: #3b82f6; text-decoration: underline; }
+.app-footer span { opacity: .35; }
 
 /* Let direct children shrink so nothing forces horizontal overflow */
 .container > * { min-width: 0; }

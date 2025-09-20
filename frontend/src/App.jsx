@@ -17,6 +17,19 @@ const bannerBtnStyle = (bg) => ({
   fontSize: '0.85rem'
 });
 
+// Reusable global footer component (policy links)
+function GlobalFooter() {
+  return (
+    <footer className="app-footer" style={{ marginTop: '40px' }}>
+      <a href="/src/privacypolicy.html" target="_blank" rel="noopener">Privacy Policy</a>
+      <span>|</span>
+      <a href="/src/termsofservice.html" target="_blank" rel="noopener">Terms of Service</a>
+      <span>|</span>
+      <a href="/src/cookies.html" target="_blank" rel="noopener">Cookie Policy</a>
+    </footer>
+  );
+}
+
 function App() {
   // Navigation state
   const [page, setPage] = useState('login'); // 'login' or 'register'
@@ -320,7 +333,8 @@ function App() {
   }, [loggedIn, username]);
 
   return (
-  <div className="container" style={{ position: 'relative', minHeight: '100vh' }}>
+  <>
+  <div className={`container ${loggedIn ? 'logged-in' : ''}`} style={{ position: 'relative' }}>
       {/* Cookie Preferences Banner */}
       {showCookieBanner && (
         <div className="cookie-overlay" role="dialog" aria-modal="true" aria-label="Cookie preferences">
@@ -332,9 +346,9 @@ function App() {
                   We use essential cookies to make this site work. With your permission we may also use
                   analytics cookies to understand usage and improve the product. You can accept all,
                   reject non-essential, or customize your choices.
-                  Read our <a href="/cookies.html" target="_blank" rel="noopener">Cookie Policy</a>,
-                  <a href="/privacypolicy.html" target="_blank" rel="noopener"> Privacy Policy</a> and
-                  <a href="/termsofservice.html" target="_blank" rel="noopener"> Terms</a>.
+                  Read our <a href="/src/cookies.html" target="_blank" rel="noopener">Cookie Policy</a>,
+                  <a href="/src/privacypolicy.html" target="_blank" rel="noopener"> Privacy Policy</a> and
+                  <a href="/src/termsofservice.html" target="_blank" rel="noopener"> Terms</a>.
                 </p>
                 <div className="cookie-actions">
                   <button onClick={acceptAllCookies} className="ck-btn primary">Accept All</button>
@@ -496,15 +510,7 @@ function App() {
               </div>
             </form>
           )}
-          <footer style={{background: '#161e2e', color: '#eaf1fb', textAlign: 'center', padding: '20px 0', marginTop: '48px', fontSize: '0.75rem', borderTop: '1px solid #232a3a', width: '100%'}}>
-            <div style={{display:'flex', gap:'14px', justifyContent:'center', alignItems:'center', flexWrap:'wrap', width: '100%'}}>
-              <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Privacy Policy</a>
-              <span style={{opacity:0.35}}>|</span>
-              <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Terms of Service</a>
-              <span style={{opacity:0.35}}>|</span>
-              <a href="/cookies.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Cookie Policy</a>
-            </div>
-          </footer>
+            {/* Footer removed here; now rendered globally below */}
 
       
         </>
@@ -729,19 +735,12 @@ function App() {
               <button onClick={exportCSV}>CSV ⬇</button>
             </div>
           </div>
-          {/* Bottom links for logged-in view (footer area inside container) */}
-          <footer style={{background: '#161e2e', color: '#eaf1fb', textAlign: 'center', padding: '20px 0', marginTop: '48px', fontSize: '0.75rem', borderTop: '1px solid #232a3a', position: 'absolute', left: 0, right: 0, bottom: 0}}>
-            <div style={{display:'flex', gap:'14px', justifyContent:'center', alignItems:'center', flexWrap:'wrap'}}>
-              <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Privacy Policy</a>
-              <span style={{opacity:0.35}}>|</span>
-              <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Terms of Service</a>
-              <span style={{opacity:0.35}}>|</span>
-              <a href="/cookies.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Cookie Policy</a>
-            </div>
-          </footer>
+          {/* Footer removed here to avoid duplicate; unified footer handled in logged-out section or can be placed globally if needed. */}
         </>
       )}
+      <GlobalFooter />
     </div>
+  </>
   );
 }
 
