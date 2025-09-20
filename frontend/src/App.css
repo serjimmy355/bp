@@ -104,6 +104,15 @@ body {
 .app-footer a { color: #3b82f6; text-decoration: underline; }
 .app-footer span { opacity: .35; }
 
+/* Remember me row alignment (centered) */
+.remember-row { width:100%; display:flex; justify-content:flex-start; align-items:center; margin:-20px 0 -20px; padding: 0 12px 0; }
+.remember-row label { display:inline-flex; align-items:center; gap:6px; font-size:0.72rem; cursor:pointer; line-height:1; }
+.remember-row input[type="checkbox"] { margin:0; transform: translateY(-1px); }
+
+/* Auth action buttons centered */
+.auth-actions { display:flex; justify-content:center; gap:16px; margin-top:12px; flex-wrap:wrap; width:100%; }
+.auth-actions button { min-width:220px; }
+
 /* Let direct children shrink so nothing forces horizontal overflow */
 .container > * { min-width: 0; }
 

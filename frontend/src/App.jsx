@@ -41,6 +41,8 @@ function App() {
   const [username, setUsername] = useState(() => localStorage.getItem('bp_username') || '');
   const [password, setPassword] = useState('');
   const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem('bp_username'));
+  // Remember-me preference (persisted if user opts in)
+  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('bp_remember') === 'true');
   const [message, setMessage] = useState('');
   const [systolic, setSystolic] = useState('');
   const [diastolic, setDiastolic] = useState('');
@@ -111,6 +113,7 @@ function App() {
     setPage('login');
     localStorage.removeItem('bp_username');
     localStorage.removeItem('bp_last_activity');
+    localStorage.removeItem('bp_remember');
   };
 
   // Handle select all
@@ -212,6 +215,11 @@ function App() {
       setMessage(msg || 'Logged in!');
       localStorage.setItem('bp_username', username);
       localStorage.setItem('bp_last_activity', Date.now().toString());
+      if (rememberMe) {
+        localStorage.setItem('bp_remember', 'true');
+      } else {
+        localStorage.removeItem('bp_remember');
+      }
       fetchMeasurements(username);
     } else {
       setMessage(msg || 'Login failed');
@@ -307,6 +315,10 @@ function App() {
   useEffect(() => {
     if (loggedIn) {
       updateActivity();
+      if (rememberMe) {
+        // Skip auto-logout when rememberMe active
+        return; // no cleanup needed beyond default
+      }
       const checkInactivity = () => {
         const last = parseInt(localStorage.getItem('bp_last_activity') || '0', 10);
         if (Date.now() - last > INACTIVITY_LIMIT) {
@@ -324,7 +336,7 @@ function App() {
         window.removeEventListener('click', updateActivity);
       };
     }
-  }, [loggedIn]);
+  }, [loggedIn, rememberMe]);
 
   useEffect(() => {
     if (loggedIn && username) {
@@ -457,7 +469,7 @@ function App() {
                   {message}
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
+              <div className="auth-actions">
                 <button type="submit">Register</button>
                 <button type="button" onClick={() => { setPage('login'); setMessage(''); }}>Back to Login</button>
               </div>
@@ -490,11 +502,18 @@ function App() {
                 />
                 {/* ...existing code for bubble... */}
               </div>
+              {/* Remember me checkbox directly under password field */}
+              <div className="remember-row">
+                <label>
+                  <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
+                  Keep me signed in
+                </label>
+              </div>
               {/* Login message under form */}
               {message && (
                 <div style={{
                   color: '#d70000ff',
-                  marginBottom: '12px',
+                  margin: '12px 0',
                   textAlign: 'center',
                   fontWeight: 'bold',
                   background: 'none',
@@ -504,7 +523,7 @@ function App() {
                   {message}
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
+              <div className="auth-actions" style={{ marginTop: '8px' }}>
                 <button type="submit">Login</button>
                 <button type="button" onClick={() => { setPage('register'); setMessage(''); }}>Register</button>
               </div>
