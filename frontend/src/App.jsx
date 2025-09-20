@@ -5,6 +5,18 @@ import logo from './assets/logo.svg';
 
 const API_BASE = 'https://bp-worker.jimross355.workers.dev';
 
+// Reusable style generator for cookie banner buttons
+const bannerBtnStyle = (bg) => ({
+  background: bg,
+  color: '#fff',
+  border: 'none',
+  borderRadius: 6,
+  padding: '8px 16px',
+  cursor: 'pointer',
+  fontWeight: 600,
+  fontSize: '0.85rem'
+});
+
 function App() {
   // Navigation state
   const [page, setPage] = useState('login'); // 'login' or 'register'
@@ -24,14 +36,51 @@ function App() {
   const [measurements, setMeasurements] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   // Cookie consent state
-  const [cookieConsent, setCookieConsent] = useState(() => {
-    const consent = localStorage.getItem('cookieConsent');
-    return consent === 'all' || consent === 'essential';
+  // Cookie preferences model
+  // Stored as JSON: { essential: true, analytics: boolean }
+  // Backwards compatibility: legacy values 'accepted','all','essential','true'
+  const [cookiePrefs, setCookiePrefs] = useState(() => {
+    try {
+      const raw = localStorage.getItem('cookiePrefs');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && parsed.essential) return parsed;
+      }
+      const legacy = localStorage.getItem('cookieConsent');
+      if (legacy && ['accepted','all','essential','true'].includes(legacy)) {
+        const migrated = { essential: true, analytics: false };
+        localStorage.setItem('cookiePrefs', JSON.stringify(migrated));
+        return migrated;
+      }
+    } catch {}
+    return { essential: false, analytics: false };
   });
-  // Handle cookie consent
-  const handleCookieConsent = (type) => {
-    localStorage.setItem('cookieConsent', type);
-    setCookieConsent(true);
+  const [showCookieBanner, setShowCookieBanner] = useState(() => !cookiePrefs.essential);
+  const [showCustomize, setShowCustomize] = useState(false);
+
+  const persistCookiePrefs = (prefs) => {
+    setCookiePrefs(prefs);
+    localStorage.setItem('cookiePrefs', JSON.stringify(prefs));
+  };
+
+  const acceptAllCookies = () => {
+    persistCookiePrefs({ essential: true, analytics: true });
+    setShowCookieBanner(false);
+    setShowCustomize(false);
+  };
+  const rejectNonEssential = () => {
+    persistCookiePrefs({ essential: true, analytics: false });
+    setShowCookieBanner(false);
+    setShowCustomize(false);
+  };
+  const saveCustomCookies = () => {
+    // essential must always be true to continue
+    persistCookiePrefs(prev => ({ essential: true, analytics: prev.analytics }));
+    setShowCookieBanner(false);
+    setShowCustomize(false);
+  };
+  const toggleAnalytics = () => {
+    setCookiePrefs(p => ({ ...p, analytics: !p.analytics }));
   };
 
   // Logout handler
@@ -157,20 +206,6 @@ function App() {
   };
 
   const submitMeasurement = async (e) => {
-                {/* Login message under form */}
-                {message && (
-                  <div style={{
-                    color: '#fff',
-                    marginBottom: '12px',
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    background: 'none',
-                    border: 'none',
-                    boxShadow: 'none',
-                  }}>
-                    {message}
-                  </div>
-                )}
     e.preventDefault();
     setMessage('');
     // Use device local time string for timestamp
@@ -222,11 +257,6 @@ function App() {
     const data = await res.json().catch(() => ({}));
     setMessage(data.message || data.error || '');
     fetchMeasurements(username);
-  // Individual delete with confirmation
-  const handleDeleteMeasurement = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this record?')) return;
-    await deleteMeasurement(id);
-  };
   };
 
   const exportCSV = async () => {
@@ -291,39 +321,80 @@ function App() {
 
   return (
   <div className="container" style={{ position: 'relative', minHeight: '100vh' }}>
-      {/* Cookie Consent Banner */}
-      {!cookieConsent && (
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          background: '#232a3a',
-          color: '#eaf1fb',
-          padding: '18px 16px',
-          textAlign: 'center',
-          zIndex: 9999,
-          boxShadow: '0 -2px 8px rgba(0,0,0,0.12)',
-          fontSize: '1rem',
-        }}>
-          This website uses cookies to enhance your experience. You must accept to continue. See our
-          <a href="/privacypolicy.html" target="_blank" rel="noopener" style={{ color: '#3b82f6', textDecoration: 'underline', margin: '0 4px' }}>Privacy Policy</a>.
-          <button
-            onClick={() => { localStorage.setItem('cookieConsent', 'accepted'); setCookieConsent(true); }}
-            style={{ marginLeft: '18px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            Accept
-          </button>
+      {/* Cookie Preferences Banner */}
+      {showCookieBanner && (
+        <div className="cookie-overlay" role="dialog" aria-modal="true" aria-label="Cookie preferences">
+          <div className="cookie-modal">
+            {!showCustomize && (
+              <div className="cookie-step cookie-intro">
+                <h3>We Value Your Privacy</h3>
+                <p>
+                  We use essential cookies to make this site work. With your permission we may also use
+                  analytics cookies to understand usage and improve the product. You can accept all,
+                  reject non-essential, or customize your choices.
+                  Read our <a href="/cookies.html" target="_blank" rel="noopener">Cookie Policy</a>,
+                  <a href="/privacypolicy.html" target="_blank" rel="noopener"> Privacy Policy</a> and
+                  <a href="/termsofservice.html" target="_blank" rel="noopener"> Terms</a>.
+                </p>
+                <div className="cookie-actions">
+                  <button onClick={acceptAllCookies} className="ck-btn primary">Accept All</button>
+                  <button onClick={rejectNonEssential} className="ck-btn subtle">Reject Non-Essential</button>
+                  <button onClick={() => setShowCustomize(true)} className="ck-btn outline">Customize</button>
+                </div>
+              </div>
+            )}
+            {showCustomize && (
+              <div className="cookie-step cookie-customize">
+                <h3 style={{ marginTop: 0 }}>Cookie Preferences</h3>
+                <div className="cookie-options">
+                  <div className="cookie-option disabled">
+                    <div>
+                      <strong>Essential</strong>
+                      <div className="desc">Required for core functionality (always on).</div>
+                    </div>
+                    <input type="checkbox" checked disabled />
+                  </div>
+                  <div className="cookie-option">
+                    <div>
+                      <strong>Analytics</strong>
+                      <div className="desc">Anonymous usage metrics to improve features.</div>
+                    </div>
+                    <input type="checkbox" checked={cookiePrefs.analytics} onChange={toggleAnalytics} />
+                  </div>
+                </div>
+                <div className="cookie-actions">
+                  <button onClick={saveCustomCookies} className="ck-btn primary">Save Choices</button>
+                  <button onClick={acceptAllCookies} className="ck-btn success">Accept All</button>
+                  <button onClick={rejectNonEssential} className="ck-btn subtle">Reject Non-Essential</button>
+                  <button onClick={() => { setShowCustomize(false); if (!cookiePrefs.essential) setShowCookieBanner(true); }} className="ck-btn outline">Back</button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
       {/* Centered logo + optional logout (no floats) */}
-      <div className="topbar">
+      <div className="topbar" style={{ position: 'relative' }}>
         <img className="app-logo" src={logo} alt="Blood Pressure & Heart Rate Tracker" />
         {loggedIn && <button className="logout-btn" onClick={logout}>Logout</button>}
       </div>
+      {/* Cookie Settings button at absolute top-left of container */}
+      {loggedIn && (
+        <button
+          onClick={() => { setShowCookieBanner(true); setShowCustomize(false); }}
+          className="cookie-btn"
+          style={{ position: 'absolute', top: 16, left: 32, zIndex: 10 }}
+        >Cookies</button>
+      )}
 
       {!loggedIn ? (
         <>
+          {/* Cookie Settings button at absolute top-left of container (logged-out) */}
+          <button
+            onClick={() => { setShowCookieBanner(true); setShowCustomize(false); }}
+            className="cookie-btn"
+            style={{ position: 'absolute', top: 16, left: 32, zIndex: 10 }}
+          >Cookies</button>
           {page === 'register' ? (
             <form onSubmit={register}>
               <h2>Register</h2>
@@ -425,14 +496,16 @@ function App() {
               </div>
             </form>
           )}
-          <footer style={{background: '#161e2e', color: '#eaf1fb', textAlign: 'center', padding: '24px 0', marginTop: '48px', fontSize: '1rem', borderTop: '1px solid #232a3a', position: 'absolute', left: 0, right: 0, bottom: 0}}>
-            <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Privacy Policy</a>
-            |
-            <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Terms of Service</a>
-            |
-            <a href="/cookies.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline', margin: '0 12px'}}>Cookies Policy</a>
+          <footer style={{background: '#161e2e', color: '#eaf1fb', textAlign: 'center', padding: '20px 0', marginTop: '48px', fontSize: '0.75rem', borderTop: '1px solid #232a3a', width: '100%'}}>
+            <div style={{display:'flex', gap:'14px', justifyContent:'center', alignItems:'center', flexWrap:'wrap', width: '100%'}}>
+              <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Privacy Policy</a>
+              <span style={{opacity:0.35}}>|</span>
+              <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Terms of Service</a>
+              <span style={{opacity:0.35}}>|</span>
+              <a href="/cookies.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Cookie Policy</a>
+            </div>
           </footer>
-                |
+
       
         </>
       ) : (
@@ -656,6 +729,16 @@ function App() {
               <button onClick={exportCSV}>CSV ⬇</button>
             </div>
           </div>
+          {/* Bottom links for logged-in view (footer area inside container) */}
+          <footer style={{background: '#161e2e', color: '#eaf1fb', textAlign: 'center', padding: '20px 0', marginTop: '48px', fontSize: '0.75rem', borderTop: '1px solid #232a3a', position: 'absolute', left: 0, right: 0, bottom: 0}}>
+            <div style={{display:'flex', gap:'14px', justifyContent:'center', alignItems:'center', flexWrap:'wrap'}}>
+              <a href="/src/privacypolicy.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Privacy Policy</a>
+              <span style={{opacity:0.35}}>|</span>
+              <a href="/src/termsofservice.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Terms of Service</a>
+              <span style={{opacity:0.35}}>|</span>
+              <a href="/cookies.html" target="_blank" rel="noopener" style={{color: '#3b82f6', textDecoration: 'underline'}}>Cookie Policy</a>
+            </div>
+          </footer>
         </>
       )}
     </div>

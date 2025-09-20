@@ -59,14 +59,16 @@ body {
   border: 1px solid var(--border);
   border-radius: 20px;
   box-shadow: 0 16px 48px rgba(0,0,0,.45);
-  padding: 40px 32px 36px;
+  /* Extra bottom padding so footer clears buttons */
+  padding: 40px 32px 100px;
   width: min(720px, 100% - (var(--gutter) * 2)); /* <= key: gutters + no overhang */
   margin-inline: auto;
   min-height: 540px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* let content flow from top */
+  position: relative;
 }
 
 /* Let direct children shrink so nothing forces horizontal overflow */
@@ -95,6 +97,30 @@ body {
   border-radius: 10px;
   font-size: 0.95rem;
 }
+
+/* Smaller cookie settings button (approx 25% visual weight of logout) */
+.cookie-btn {
+  background: rgba(59,130,246,0.12);
+  color: #6ea8ff;
+  border: 1px solid rgba(110,168,255,0.35);
+  padding: 0.18em 0.7em;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s, border-color .15s, color .15s;
+  min-width: 70px;
+  max-width: 90px;
+  width: 90px;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  margin-left: 0;
+  align-self: flex-start;
+}
+.cookie-btn:hover { background: rgba(59,130,246,0.25); color: #8fc2ff; }
+.cookie-btn:active { transform: translateY(1px); }
 
 /* Forms */
 form {
@@ -360,3 +386,60 @@ html, body, #root {
   min-width: 560px;             /* give columns room; tweak as you like */
   margin: 1rem 0 0;             /* no side auto-margins */
 }
+
+/* ================= Cookie Modal ================= */
+.cookie-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.70);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 24px;
+  animation: fadeIn .25s ease-out;
+}
+.cookie-modal {
+  width: min(760px, 100%);
+  background: linear-gradient(180deg,#1b2536 0%, #141d2c 100%);
+  border: 1px solid #2a3547;
+  border-radius: 28px;
+  box-shadow: 0 18px 60px -10px rgba(0,0,0,0.55), 0 4px 10px rgba(0,0,0,0.35);
+  padding: clamp(28px,4vw,40px) clamp(28px,4vw,48px) 36px;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  position: relative;
+  animation: scaleIn .28s cubic-bezier(.4,.8,.3,1);
+}
+.cookie-modal h3 { margin-top: 0; font-size: 1.55rem; letter-spacing: .5px; }
+.cookie-modal a { color: var(--accent); text-decoration: underline; }
+.cookie-step { display: flex; flex-direction: column; gap: 18px; }
+.cookie-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.ck-btn { flex: 1; min-width: 160px; padding: 12px 18px; font-size: .9rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; transition: background .2s, transform .15s; }
+.ck-btn.primary { background: var(--accent); }
+.ck-btn.primary:hover { background: var(--accent-hover); }
+.ck-btn.success { background: #059669; }
+.ck-btn.success:hover { background: #047857; }
+.ck-btn.subtle { background: #374151; }
+.ck-btn.subtle:hover { background: #4b5563; }
+.ck-btn.outline { background: transparent; border: 1px solid #3b4658; }
+.ck-btn.outline:hover { background: #1e2633; }
+.ck-btn:active { transform: translateY(1px); }
+
+.cookie-options { display: flex; flex-direction: column; gap: 14px; }
+.cookie-option { display: flex; justify-content: space-between; align-items: center; background: #232f42; padding: 14px 18px; border-radius: 14px; border: 1px solid #2f3a4e; }
+.cookie-option.disabled { opacity: .75; }
+.cookie-option strong { font-size: .95rem; }
+.cookie-option .desc { font-size: .72rem; opacity: .85; margin-top: 3px; }
+.cookie-option input { height: 20px; width: 20px; margin: 0; cursor: pointer; }
+
+@media (max-width: 640px) {
+  .cookie-modal { padding: 26px 22px 30px; border-radius: 22px; }
+  .cookie-actions { flex-direction: column; }
+  .ck-btn { width: 100%; min-width: 0; }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
