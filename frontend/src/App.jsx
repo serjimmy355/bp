@@ -41,6 +41,10 @@ function App() {
   const [username, setUsername] = useState(() => localStorage.getItem('bp_username') || '');
   const [password, setPassword] = useState('');
   const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem('bp_username'));
+  // Access token & expiry (epoch seconds)
+  const [accessToken, setAccessToken] = useState(null);
+  const [tokenExpiry, setTokenExpiry] = useState(null);
+  const [refreshTimer, setRefreshTimer] = useState(null);
   // Remember-me preference (persisted if user opts in)
   const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('bp_remember') === 'true');
   const [message, setMessage] = useState('');
@@ -114,6 +118,11 @@ function App() {
     localStorage.removeItem('bp_username');
     localStorage.removeItem('bp_last_activity');
     localStorage.removeItem('bp_remember');
+    setAccessToken(null);
+    setTokenExpiry(null);
+    if (refreshTimer) clearTimeout(refreshTimer);
+    // In new model, refresh token is HttpOnly cookie: just call /logout with credentials
+    fetch(`${API_BASE}/logout`, { method: 'POST', credentials: 'include' }).catch(()=>{});
   };
 
   // Handle select all
@@ -189,6 +198,41 @@ function App() {
     }
   };
 
+  const scheduleProactiveRefresh = (expiresInSeconds) => {
+    if (refreshTimer) clearTimeout(refreshTimer);
+    // Refresh 60s before expiry
+    const ms = Math.max(1000, (expiresInSeconds - 60) * 1000);
+    const t = setTimeout(() => {
+      silentRefresh();
+    }, ms);
+    setRefreshTimer(t);
+  };
+
+  const handleAuthSuccess = (data, providedUsername) => {
+    if (data.accessToken) {
+      setAccessToken(data.accessToken);
+      if (data.expiresIn) {
+        const exp = Math.floor(Date.now()/1000) + data.expiresIn;
+        setTokenExpiry(exp);
+        scheduleProactiveRefresh(data.expiresIn);
+      }
+    }
+    const userNameFinal = data.username || providedUsername;
+    if (userNameFinal) {
+      localStorage.setItem('bp_username', userNameFinal);
+      setUsername(userNameFinal);
+    }
+    setLoggedIn(true);
+    setMessage(data.message || 'Logged in!');
+    localStorage.setItem('bp_last_activity', Date.now().toString());
+    if (rememberMe) {
+      localStorage.setItem('bp_remember', 'true');
+    } else {
+      localStorage.removeItem('bp_remember');
+    }
+    fetchMeasurements();
+  };
+
   const login = async (e) => {
     e.preventDefault();
     setMessage('');
@@ -196,7 +240,8 @@ function App() {
     const res = await fetch(`${API_BASE}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      credentials: 'include',
+      body: JSON.stringify({ username, password, remember: rememberMe })
     });
     let msg = '';
     try {
@@ -204,26 +249,50 @@ function App() {
       if (contentType && contentType.includes('application/json')) {
         const data = await res.json();
         msg = data.message || data.error || '';
+        if (res.ok && !data.error) {
+          handleAuthSuccess(data, username);
+          return;
+        }
       } else {
         msg = await res.text();
       }
     } catch {
       msg = 'Login failed';
     }
-    if (res.ok) {
-      setLoggedIn(true);
-      setMessage(msg || 'Logged in!');
-      localStorage.setItem('bp_username', username);
-      localStorage.setItem('bp_last_activity', Date.now().toString());
-      if (rememberMe) {
-        localStorage.setItem('bp_remember', 'true');
-      } else {
-        localStorage.removeItem('bp_remember');
+    setMessage(msg || 'Login failed');
+  };
+
+  const silentRefresh = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/refresh`, { method: 'POST', credentials: 'include' });
+      if (!res.ok) {
+        // if refresh fails, logout silently (but keep username for UI until user interacts)
+        setAccessToken(null);
+        setTokenExpiry(null);
+        if (refreshTimer) clearTimeout(refreshTimer);
+        return;
       }
-      fetchMeasurements(username);
-    } else {
-      setMessage(msg || 'Login failed');
+      const data = await res.json();
+      if (data.accessToken) {
+        handleAuthSuccess(data);
+      }
+    } catch {}
+  };
+
+  const authorizedFetch = async (input, options = {}) => {
+    const headers = { ...(options.headers || {}) };
+    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+    const final = { ...options, headers, credentials: 'include' };
+    let res = await fetch(input, final);
+    if (res.status === 401) {
+      // try refresh then retry once
+      await silentRefresh();
+      if (accessToken) { // state may have updated asynchronously, we read latest via closure hazard; acceptable for simple app
+        headers['Authorization'] = `Bearer ${accessToken}`;
+        res = await fetch(input, final);
+      }
     }
+    return res;
   };
 
   const submitMeasurement = async (e) => {
@@ -231,18 +300,8 @@ function App() {
     setMessage('');
     // Use device local time string for timestamp
     const localTime = new Date().toLocaleString();
-    const payload = {
-      username,
-      systolic,
-      diastolic,
-      heart_rate: heartRate,
-      timestamp: localTime
-    };
-    const res = await fetch(`${API_BASE}/measurements`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const payload = { systolic, diastolic, heart_rate: heartRate, timestamp: localTime };
+    const res = await authorizedFetch(`${API_BASE}/measurements`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.message) {
       setMessage(data.message);
@@ -258,9 +317,8 @@ function App() {
     fetchMeasurements(username);
   };
 
-  const fetchMeasurements = async (usernameParam) => {
-    const url = `${API_BASE}/measurements?username=${encodeURIComponent(usernameParam)}`;
-    const res = await fetch(url);
+  const fetchMeasurements = async () => {
+    const res = await authorizedFetch(`${API_BASE}/measurements`);
     if (res.ok) {
       setMeasurements(await res.json());
     } else {
@@ -270,18 +328,14 @@ function App() {
   };
 
   const deleteMeasurement = async (id) => {
-    const res = await fetch(`${API_BASE}/measurements`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, username })
-    });
+    const res = await authorizedFetch(`${API_BASE}/measurements`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     const data = await res.json().catch(() => ({}));
     setMessage(data.message || data.error || '');
-    fetchMeasurements(username);
+    fetchMeasurements();
   };
 
   const exportCSV = async () => {
-    const res = await fetch(`${API_BASE}/export?username=${encodeURIComponent(username)}`);
+    const res = await authorizedFetch(`${API_BASE}/export`);
     if (res.ok) {
       const csv = await res.text();
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -296,7 +350,7 @@ function App() {
 
   const getAverage = async () => {
     setMessage('');
-    const res = await fetch(`${API_BASE}/average?username=${encodeURIComponent(username)}`);
+    const res = await authorizedFetch(`${API_BASE}/average`);
     if (res.ok) {
       setAverage(await res.json());
     } else {
@@ -339,10 +393,18 @@ function App() {
   }, [loggedIn, rememberMe]);
 
   useEffect(() => {
-    if (loggedIn && username) {
-      fetchMeasurements(username);
+    if (loggedIn) {
+      fetchMeasurements();
     }
-  }, [loggedIn, username]);
+  }, [loggedIn]);
+
+  // Silent refresh on initial mount (cookie-based)
+  useEffect(() => {
+    if (!loggedIn) {
+      silentRefresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
   <>

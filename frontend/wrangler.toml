@@ -1,0 +1,9 @@
+name = "bptracking"
+pages_build_output_dir = "frontend/dist"
+compatibility_date = "2025-08-16"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bptracking"
+database_id = "ff7f5d4e-4fb2-4791-9fc2-53fce031fa3a"
