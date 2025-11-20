@@ -302,14 +302,21 @@ tbody tr:hover { background: #18213a; }
 /* ---------- Responsive fixes for mobile overflow ---------- */
 
 /* Measurements block uses full card width */
-.message-container { width: 100%; }
+.message-container { width: 100%; display:flex; flex-direction:column; gap:12px; align-items:stretch; }
 
-/* Horizontal scroll lives in this wrapper only */
+/* Make the table area scroll vertically inside the panel so action buttons remain visible */
 .table-wrap {
   width: 100%;
   overflow-x: auto;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto; /* allow the wrapper to grow/shrink inside .message-container */
+  max-height: 360px; /* enough rows to show without growing past the card */
+  border-radius: 12px;
 }
+
+/* Keep table header visible while scrolling */
+.table-wrap thead th { position: sticky; top: 0; z-index: 3; }
 
 /* Table behaves inside its wrapper (no page overhang) */
 .table-wrap table {
