@@ -16,14 +16,18 @@ export default {
     const TWO_YEARS_MS = 1000 * 60 * 60 * 24 * 730;
     const ACCESS_TOKEN_TTL_SEC = 60 * 15; // 15 minutes
     // Dynamic CORS (replace with explicit allowlist in production)
-    const origin = request.headers.get('Origin') || '';
+    const origin = request.headers.get('Origin');
     const corsHeaders = {
-      'Access-Control-Allow-Origin': origin || '*',
+      // Access-Control-Allow-Origin must reflect the exact origin when credentials are used.
+      // Only set it if an Origin header is present; do NOT fall back to '*'.
       'Vary': 'Origin',
       'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     };
+    if (origin) {
+      corsHeaders['Access-Control-Allow-Origin'] = origin;
+    }
     const pathname = url.pathname.replace(/\/+$/, '');
 
     if (request.method === 'OPTIONS') {
